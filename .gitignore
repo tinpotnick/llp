@@ -1,0 +1,24 @@
+# Flutter related
+**/build/
+**/.dart_tool/
+**/.idea/
+**/.vscode/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+
+# Platform-specific directories
+**/android/
+**/ios/
+**/macos/
+**/windows/
+**/linux/
+**/web/
+
+# Coverage and debugging
+**/coverage/
+*.log
+
+# Others
+**/.DS_Store
+**/.env
