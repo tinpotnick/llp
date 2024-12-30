@@ -60,10 +60,13 @@ class FlashcardProvider with ChangeNotifier {
   }
 
   void updateCard(int index, Flashcard updatedCard) {
-    if (index >= 0 && index < _allCards.length) {
-      _allCards[index] = updatedCard;
-      notifyListeners(); // Notify listeners about the update
+    if (index < 0 || index > _allCards.length) {
+      return;
     }
+
+    _allCards[index] = updatedCard;
+    notifyListeners(); // Notify listeners about the update
+    _saveToStorage(); // Save the updated list to storage
   }
 
   void updateCardStatus(int index, String newStatus) {

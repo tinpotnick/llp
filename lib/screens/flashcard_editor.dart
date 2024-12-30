@@ -39,6 +39,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
             (widget.flashcard.end.inMilliseconds / 1000.0).toStringAsFixed(2));
 
     _audioPlayer.onPositionChanged.listen((position) {
+      if (!mounted) return; // Prevent setState if widget is disposed
       setState(() {
         _currentPosition = position;
       });
@@ -48,9 +49,11 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
 
       if (_currentPosition >= end || _currentPosition < start) {
         _audioPlayer.pause();
-        setState(() {
-          _isPlaying = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isPlaying = false;
+          });
+        }
       }
     });
   }
@@ -62,7 +65,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    _audioPlayer.dispose(); // Dispose audio player
     _translationController.dispose();
     _startController.dispose();
     _endController.dispose();
@@ -81,9 +84,11 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
     } else {
       await _audioPlayer.play(UrlSource(widget.flashcard.audioUrl));
       _audioPlayer.seek(start);
-      setState(() {
-        _isPlaying = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isPlaying = true;
+        });
+      }
     }
   }
 
