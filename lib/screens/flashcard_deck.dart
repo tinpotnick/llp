@@ -177,46 +177,59 @@ class _FlashcardTileState extends State<FlashcardTile> {
                 children: [
                   Text('Translation: ${widget.flashcard.translation}'),
                   SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  OverflowBar(
                     children: [
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Graded as Hard')),
                           );
                         },
-                        child: Text('Hard'),
+                        icon: Icon(Icons.thumb_down),
+                        label: Text('+1m'),
                       ),
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Graded as Good')),
                           );
                         },
-                        child: Text('Good'),
+                        icon: Icon(Icons.thumbs_up_down),
+                        label: Text('+2d'),
                       ),
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Graded as Easy')),
                           );
                         },
-                        child: Text('Easy'),
+                        icon: Icon(Icons.thumb_up),
+                        label: Text('+2d'),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Graded as Easy')),
+                          );
+                        },
+                        icon: Icon(Icons.sentiment_very_satisfied),
+                        label: Text('+4d'),
                       ),
                     ],
                   ),
                   SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: widget.onEdit,
-                        child: Text('Edit'),
+                        icon: Icon(Icons.edit),
+                        label: Text('Edit'),
                       ),
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: widget.onDelete,
-                        child: Text('Delete'),
+                        icon: Icon(Icons.delete),
+                        label: Text('Delete'),
                       ),
                     ],
                   ),
