@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import '../providers/podcast_provider.dart';
+import '../models/podcast.dart';
 import 'podcast_detail_screen.dart';
 
 class SubscribedNavigator extends StatefulWidget {
@@ -9,39 +12,21 @@ class SubscribedNavigator extends StatefulWidget {
 }
 
 class _SubscribedNavigatorState extends State<SubscribedNavigator> {
-  List<Map<String, dynamic>> _subscriptions = [];
+  List<Podcast> _subscriptions = [];
+  bool _isLoading = true;
 
   Future<void> _loadSubscriptions() async {
-    final prefs = await SharedPreferences.getInstance();
-    final subscriptionList = prefs.getStringList('subscriptions') ?? [];
+    Map<String, Podcast> mapofsubs =
+        Provider.of<PodcastProvider>(context, listen: false).podcasts;
 
-    final subscriptions = subscriptionList
-        .map((subscriptionJson) {
-          try {
-            // Decode JSON string to Map<String, dynamic>
-            return jsonDecode(subscriptionJson) as Map<String, dynamic>;
-          } catch (e) {
-            // Handle corrupted or invalid data gracefully
-            print('Error decoding subscription: $e');
-            return null; // Skip invalid entries
-          }
-        })
-        .where((element) => element != null)
-        .toList();
+    _subscriptions = mapofsubs.values.toList();
 
     setState(() {
-      _subscriptions = subscriptions.cast<Map<String, dynamic>>();
+      _isLoading = false;
     });
   }
 
-  Future<void> _removeSubscription(Map<String, dynamic> podcast) async {
-    final prefs = await SharedPreferences.getInstance();
-    final subscriptionList = prefs.getStringList('subscriptions') ?? [];
-    final podcastJson = jsonEncode(podcast);
-    subscriptionList.remove(podcastJson);
-    await prefs.setStringList('subscriptions', subscriptionList);
-    _loadSubscriptions();
-  }
+  Future<void> _removeSubscription(Podcast? podcast) async {}
 
   @override
   void initState() {
@@ -62,11 +47,9 @@ class _SubscribedNavigatorState extends State<SubscribedNavigator> {
               itemBuilder: (context, index) {
                 final podcast = _subscriptions[index];
                 return ListTile(
-                  leading: podcast['artworkUrl600'] != null
-                      ? Image.network(podcast['artworkUrl600'])
-                      : Icon(Icons.library_music),
-                  title: Text(podcast['collectionName'] ?? 'Unknown Podcast'),
-                  subtitle: Text(podcast['artistName'] ?? 'Unknown Artist'),
+                  leading: Image.network(podcast.imageUrl),
+                  title: Text(podcast.title),
+                  subtitle: Text(podcast.author),
                   trailing: IconButton(
                     icon: Icon(Icons.delete, color: Colors.red),
                     onPressed: () => _removeSubscription(podcast),
