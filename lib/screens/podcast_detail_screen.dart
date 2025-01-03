@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' as html;
 import 'podcast_player.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+
+import 'package:provider/provider.dart';
+import '../models/podcast.dart';
+import '../providers/podcast_provider.dart';
+import '../services/podcast_service.dart';
 
 class PodcastDetailScreen extends StatefulWidget {
   final dynamic podcast;
@@ -15,95 +16,87 @@ class PodcastDetailScreen extends StatefulWidget {
 }
 
 class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
-  bool _isLoading = true; // Tracks whether the episodes are being loaded
-  List<Map<String, String>> _episodes = []; // Holds the episodes
+  bool _isLoading = true;
+  Podcast? _podcast;
 
   @override
   void initState() {
     super.initState();
-    _fetchEpisodes(); // Load episodes when the screen initializes
+    _fetchEpisodes();
   }
 
   Future<void> _fetchEpisodes() async {
     setState(() {
-      _isLoading = true; // Set loading state
+      _isLoading = true;
     });
 
     try {
-      final response = await http.get(Uri.parse(widget.podcast['feedUrl']));
-      if (response.statusCode == 200) {
-        final document = html.parse(response.body);
-        final items = document.getElementsByTagName('item');
-
-        final episodes = items.map((item) {
-          final title = item.getElementsByTagName('title').first.text;
-          final audioUrl = item.getElementsByTagName('enclosure').isNotEmpty
-              ? item.getElementsByTagName('enclosure').first.attributes['url']
-              : null;
-          final pubDate = item.getElementsByTagName('pubDate').isNotEmpty
-              ? item.getElementsByTagName('pubDate').first.text
-              : 'Unknown Date';
-
-          return {
-            'title': title,
-            'audioUrl': audioUrl ?? '',
-            'pubDate': pubDate,
-          };
-        }).toList();
-
-        setState(() {
-          _episodes = episodes; // Update the episodes list
-        });
-      } else {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to fetch episodes')));
-      }
+      _podcast = await PodcastService.fetchPodcastDetails(widget.podcast);
     } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error fetching episodes: $e')));
     } finally {
       setState(() {
-        _isLoading = false; // Reset loading state
+        _isLoading = false;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading || _podcast == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    final sanitizedDescription = extractPlainText(widget.podcast.description);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.podcast['collectionName'] ?? 'Podcast Details'),
+        title: Text(widget.podcast.title),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator()) // Show loading indicator
+          ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (widget.podcast['artworkUrl600'] != null)
-                      Center(
-                        child: Image.network(
-                          widget.podcast['artworkUrl600'],
-                          height: 150,
-                        ),
+                    Center(
+                      child: Image.network(
+                        widget.podcast.imageUrl,
+                        height: 150,
                       ),
+                    ),
                     SizedBox(height: 16),
                     Text(
-                      widget.podcast['collectionName'] ?? 'Unknown Podcast',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                      sanitizedDescription,
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Artist: ${widget.podcast['artistName'] ?? 'Unknown Artist'}',
+                      'Artist: ${widget.podcast.author}',
                       style: TextStyle(fontSize: 16),
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Feed URL: ${widget.podcast['feedUrl'] ?? 'No Feed URL Available'}',
+                      'Feed URL: ${widget.podcast.url}',
                       style: TextStyle(fontSize: 16),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_podcast == null) {
+                          return;
+                        }
+
+                        Provider.of<PodcastProvider>(context, listen: false)
+                            .addPodcast(_podcast!);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'Subscribed to ${widget.podcast.title}')),
+                        );
+                      },
+                      child: Text('Subscribe'),
                     ),
                     SizedBox(height: 16),
                     Text(
@@ -114,27 +107,28 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: _episodes.length,
+                      itemCount: _podcast?.episodes.length,
                       itemBuilder: (context, index) {
-                        final episode = _episodes[index];
+                        final episode = _podcast?.episodes[index];
+
+                        final String episodeTitle = episode?.title ?? '';
+
                         return ListTile(
-                          title: Text(episode['title'] ?? 'Unknown Title'),
-                          subtitle: Text('Published on: ${episode['pubDate']}'),
-                          trailing: IconButton(
-                            icon: Icon(Icons.play_arrow),
-                            onPressed: () {
-                              // Navigate to PodcastPlayerScreen with episode URL
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PodcastPlayerScreen(
-                                    audioUrl: episode['audioUrl']!,
-                                    episodeTitle: episode['title']!,
-                                  ),
-                                ),
-                              );
-                            },
+                          title: Text(
+                            episodeTitle,
                           ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PodcastPlayerScreen(
+                                  audioUrl: episode?.audioUrl ?? '',
+                                  episodeTitle: episode?.title ?? '',
+                                ),
+                              ),
+                            );
+                          },
+                          subtitle: Text('Published on: ${episode?.pubDate}'),
                         );
                       },
                     ),
