@@ -42,7 +42,7 @@ dependencies:
   shared_preferences: ^2.0.15
   http: ^1.2.2
   html: ^0.15.0
-  flutter_html: ^2.1.1
+  uuid: ^4.5.1
 
 
 dev_dependencies:
@@ -97,3 +97,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+  fonts:
+    # Arabic
+    - family: NotoSans
+      fonts:
+        - asset: fonts/static/NotoSans-Regular.ttf
+        - asset: fonts/static/NotoSans-Bold.ttf
+          weight: 700
