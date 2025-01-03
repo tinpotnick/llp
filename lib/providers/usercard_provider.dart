@@ -14,18 +14,25 @@ class UserCardProvider with ChangeNotifier {
 
   UserCardProvider(this.flashcardProvider);
 
-  UserFlashcardStatus getUserCard(String uuid) {
-    return _userStatus[uuid]!;
+  UserFlashcardStatus getUserCard(Flashcard card) {
+    return _userStatus[card.uuid]!;
   }
 
-  void addOrUpdateCard(UserFlashcardStatus card) {
-    _userStatus[card.uuid] = card;
+  void addCard(Flashcard card) {
+    _userStatus[card.uuid] = UserFlashcardStatus(
+      flashcardUuid: card.uuid,
+      lastReviewed: DateTime.now(),
+      nextDue: DateTime.now(),
+    );
     _saveToStorage();
     notifyListeners();
   }
 
-  void addCard(UserFlashcardStatus card) => addOrUpdateCard(card);
-  void updateCard(UserFlashcardStatus card) => addOrUpdateCard(card);
+  void updateCard(UserFlashcardStatus card) {
+    _userStatus[card.uuid] = card;
+    _saveToStorage();
+    notifyListeners();
+  }
 
   void removeCard(UserFlashcardStatus card) {
     _userStatus.remove(card.uuid);

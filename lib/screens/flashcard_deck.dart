@@ -54,7 +54,6 @@ class _FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => FlashcardEditorScreen(
-                        index: index,
                         flashcard: flshcard,
                       ),
                     ),

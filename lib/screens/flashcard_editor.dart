@@ -3,14 +3,14 @@ import 'package:audioplayers/audioplayers.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
 import '../models/flashcard.dart';
+import '../models/usercard.dart';
 import '../providers/flashcard_provider.dart';
+import '../providers/usercard_provider.dart';
 
 class FlashcardEditorScreen extends StatefulWidget {
-  final int index;
   final Flashcard flashcard;
 
   const FlashcardEditorScreen({
-    required this.index,
     required this.flashcard,
   });
 
@@ -75,7 +75,6 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
 
   Future<void> _playPause() async {
     final start = _getDurationFromController(_startController);
-    final end = _getDurationFromController(_endController);
 
     if (_isPlaying) {
       await _audioPlayer.pause();
@@ -99,11 +98,56 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
     setState(() {});
   }
 
+  void _saveFlashcard() {
+    final newStart = _getDurationFromController(_startController);
+    final newEnd = _getDurationFromController(_endController);
+
+    if (newStart >= newEnd) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Start time must be before end time.'),
+        ),
+      );
+      return;
+    }
+
+    Provider.of<FlashcardProvider>(context, listen: false)
+        .updateCard(widget.flashcard);
+
+    Navigator.pop(context);
+  }
+
+  void _starFlashcard() {
+    UserFlashcardStatus userflashcard;
+
+    try {
+      userflashcard = Provider.of<UserCardProvider>(context, listen: false)
+          .getUserCard(widget.flashcard);
+    } catch (e) {
+      Provider.of<UserCardProvider>(context, listen: false)
+          .addCard(widget.flashcard);
+      return;
+    }
+
+    Provider.of<UserCardProvider>(context, listen: false)
+        .removeCard(userflashcard);
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final start = double.tryParse(_startController.text) ?? 0.0;
     final end = double.tryParse(_endController.text) ?? 0.0;
     final snippetDuration = math.max(0, end - start).toDouble();
+
+    bool isstarred = true;
+    try {
+      Provider.of<UserCardProvider>(context, listen: false)
+          .getUserCard(widget.flashcard);
+    } catch (e) {
+      isstarred = false;
+    }
 
     // Ensure slider value is within bounds
     final sliderValue = math
@@ -198,35 +242,22 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
             // Play/Pause Button
             Row(
               children: [
-                ElevatedButton(
+                IconButton(
                   onPressed: _playPause,
-                  child: Text(_isPlaying ? 'Pause' : 'Play'),
+                  icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                ),
+                IconButton(
+                  onPressed: _saveFlashcard,
+                  icon: Icon(Icons.save),
+                ),
+                IconButton(
+                  onPressed: _starFlashcard,
+                  icon:
+                      Icon(isstarred ? Icons.star : Icons.star_border_outlined),
                 ),
               ],
             ),
             SizedBox(height: 16),
-
-            // Save Button
-            ElevatedButton(
-              onPressed: () {
-                final newStart = _getDurationFromController(_startController);
-                final newEnd = _getDurationFromController(_endController);
-
-                if (newStart >= newEnd) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text('Start time must be before end time.')),
-                  );
-                  return;
-                }
-
-                Provider.of<FlashcardProvider>(context, listen: false)
-                    .updateCard(widget.flashcard);
-
-                Navigator.pop(context);
-              },
-              child: Text('Save'),
-            ),
           ],
         ),
       ),

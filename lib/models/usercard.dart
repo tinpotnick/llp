@@ -25,8 +25,8 @@ class UserFlashcardStatus {
   Map<String, dynamic> toJson() {
     return {
       'flashcardUuid': flashcardUuid,
-      'lastReviewed': lastReviewed,
-      'nextDue': nextDue,
+      'lastReviewed': lastReviewed.toIso8601String(),
+      'nextDue': nextDue.toIso8601String(),
       'interval': interval,
     };
   }

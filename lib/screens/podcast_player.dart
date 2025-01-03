@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../models/flashcard.dart';
 import '../providers/flashcard_provider.dart';
 
+import 'flashcard_editor.dart';
+
 class PodcastPlayerScreen extends StatefulWidget {
   final String audioUrl;
   final String episodeTitle;
@@ -211,6 +213,42 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
             ElevatedButton(
               onPressed: () => _saveFlashcard(context),
               child: Text('Save Flashcard'),
+            ),
+
+            SizedBox(height: 20),
+
+            // Display flashcards
+            Expanded(
+              child: Consumer<FlashcardProvider>(
+                builder: (context, flashcardProvider, child) {
+                  final flashcards = flashcardProvider
+                      .getFlashcardsForEpisode(widget.audioUrl);
+                  return ListView.builder(
+                    itemCount: flashcards.length,
+                    itemBuilder: (context, index) {
+                      final flashcard = flashcards[index];
+                      return ListTile(
+                        title: Text(flashcard.text),
+                        subtitle: Text(flashcard.translation),
+                        onTap: () => {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FlashcardEditorScreen(
+                                flashcard: flashcard,
+                              ),
+                            ),
+                          )
+                        },
+                        trailing: Text(
+                          '${flashcard.start.inMinutes}:${flashcard.start.inSeconds.remainder(60).toString().padLeft(2, '0')} - '
+                          '${flashcard.end.inMinutes}:${flashcard.end.inSeconds.remainder(60).toString().padLeft(2, '0')}',
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),

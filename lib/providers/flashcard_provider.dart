@@ -12,6 +12,10 @@ class FlashcardProvider with ChangeNotifier {
     return _allCards[uuid]!;
   }
 
+  List<Flashcard> getFlashcardsForEpisode(String url) {
+    return _allCards.values.where((card) => card.audioUrl == url).toList();
+  }
+
   void addOrUpdateCard(Flashcard card) {
     _allCards[card.uuid] = card;
     _saveToStorage();
