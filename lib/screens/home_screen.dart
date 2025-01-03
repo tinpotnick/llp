@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'podcast_player.dart';
 import 'podcast_browser.dart';
 import 'subscribed_navigator.dart';
 import 'flashcard_deck.dart';
