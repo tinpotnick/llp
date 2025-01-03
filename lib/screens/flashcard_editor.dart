@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
+import '../models/flashcard.dart';
 import '../providers/flashcard_provider.dart';
 
 class FlashcardEditorScreen extends StatefulWidget {
@@ -220,16 +221,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                 }
 
                 Provider.of<FlashcardProvider>(context, listen: false)
-                    .updateCard(
-                  widget.index,
-                  Flashcard(
-                    text: widget.flashcard.text,
-                    translation: _translationController.text,
-                    audioUrl: widget.flashcard.audioUrl,
-                    start: newStart,
-                    end: newEnd,
-                  ),
-                );
+                    .updateCard(widget.flashcard);
 
                 Navigator.pop(context);
               },
