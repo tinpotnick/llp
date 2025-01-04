@@ -81,21 +81,34 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
     });
   }
 
-  void _markStart() {
-    setState(() {
-      _startTimestamp = _currentPosition;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Start point marked: $_startTimestamp')),
+  void _addCard() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FlashcardEditorScreen(
+          flashcard: Flashcard(
+              audioUrl: widget.audioUrl,
+              text: widget.episodeTitle,
+              translation: '',
+              start: _currentPosition - Duration(seconds: 5),
+              end: _currentPosition),
+        ),
+      ),
     );
   }
 
-  void _markEnd() {
-    setState(() {
-      _endTimestamp = _currentPosition;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('End point marked: $_endTimestamp')),
+  Future<void> _addFlashcard(BuildContext context, Flashcard flashcard) async {
+    if (_isPlaying) {
+      await _playPause();
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FlashcardEditorScreen(
+          flashcard: flashcard,
+        ),
+      ),
     );
   }
 
@@ -179,44 +192,14 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
                   iconSize: 40,
                   onPressed: _playPause,
                 ),
-              ],
-            ),
-            SizedBox(height: 20),
-
-            // Flashcard controls
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: _markStart,
-                  child: Text('Mark Start'),
-                ),
-                ElevatedButton(
-                  onPressed: _markEnd,
-                  child: Text('Mark End'),
+                IconButton(
+                  icon: Icon(Icons.add_task),
+                  iconSize: 40,
+                  onPressed: _addCard,
                 ),
               ],
             ),
             SizedBox(height: 20),
-
-            // Translation input
-            TextField(
-              controller: _translationController,
-              decoration: InputDecoration(
-                labelText: 'Translation',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 20),
-
-            // Save flashcard button
-            ElevatedButton(
-              onPressed: () => _saveFlashcard(context),
-              child: Text('Save Flashcard'),
-            ),
-
-            SizedBox(height: 20),
-
             // Display flashcards
             Expanded(
               child: Consumer<FlashcardProvider>(
@@ -230,16 +213,7 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
                       return ListTile(
                         title: Text(flashcard.text),
                         subtitle: Text(flashcard.translation),
-                        onTap: () => {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FlashcardEditorScreen(
-                                flashcard: flashcard,
-                              ),
-                            ),
-                          )
-                        },
+                        onTap: () => _addFlashcard(context, flashcard),
                         trailing: Text(
                           '${flashcard.start.inMinutes}:${flashcard.start.inSeconds.remainder(60).toString().padLeft(2, '0')} - '
                           '${flashcard.end.inMinutes}:${flashcard.end.inSeconds.remainder(60).toString().padLeft(2, '0')}',
