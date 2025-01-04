@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+import 'dart:math';
 
 /// A flashcard represents a single card in a deck - this defines the actual
 /// url of the audio file, the text and translation of the card and the start
@@ -16,9 +17,11 @@ class Flashcard {
     required this.text,
     required this.translation,
     required this.audioUrl,
-    required this.start,
-    required this.end,
-  }) : uuid = uuid ?? Uuid().v4();
+    required start,
+    required end,
+  })  : uuid = uuid ?? Uuid().v4(),
+        start = Duration(milliseconds: max(0, start.inMilliseconds)),
+        end = Duration(milliseconds: max(0, end.inMilliseconds));
 
   Map<String, dynamic> toJson() {
     return {
