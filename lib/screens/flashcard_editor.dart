@@ -196,13 +196,20 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _startController,
-                    keyboardType:
-                        TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: 'Start (seconds)',
-                      border: OutlineInputBorder(),
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey, // Set the color of the border
+                        width: 1.0, // Set the width of the border
+                      ),
+                      borderRadius: BorderRadius.circular(
+                          4.0), // Mimic the rounded corners of OutlineInputBorder
+                    ),
+                    child: Text(
+                      _startController.text,
+                      style: TextStyle(fontSize: 16.0),
                     ),
                   ),
                 ),
@@ -216,13 +223,20 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                 ),
                 SizedBox(width: 8),
                 Expanded(
-                  child: TextField(
-                    controller: _endController,
-                    keyboardType:
-                        TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      labelText: 'End (seconds)',
-                      border: OutlineInputBorder(),
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey, // Set the color of the border
+                        width: 1.0, // Set the width of the border
+                      ),
+                      borderRadius: BorderRadius.circular(
+                          4.0), // Mimic the rounded corners of OutlineInputBorder
+                    ),
+                    child: Text(
+                      _endController.text,
+                      style: TextStyle(fontSize: 16.0),
                     ),
                   ),
                 ),
