@@ -38,18 +38,21 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
   Future<void> _initAudio() async {
     try {
       _audioPlayer.onPositionChanged.listen((position) {
+        if (!mounted) return;
         setState(() {
           _currentPosition = position;
         });
       });
 
       _audioPlayer.onDurationChanged.listen((duration) {
+        if (!mounted) return;
         setState(() {
           _totalDuration = duration;
         });
       });
 
       _audioPlayer.onPlayerComplete.listen((event) {
+        if (!mounted) return;
         setState(() {
           _isPlaying = false;
           _currentPosition = Duration.zero;
@@ -73,23 +76,35 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
     });
   }
 
-  Future<void> _stop() async {
-    await _audioPlayer.stop();
-    setState(() {
-      _isPlaying = false;
-      _currentPosition = Duration.zero;
-    });
+  Future<void> _rewind() {
+    final newPosition = Duration(
+      milliseconds: _currentPosition.inMilliseconds - 10000,
+    );
+    return _audioPlayer.seek(newPosition);
   }
 
-  void _addCard() {
+  Future<void> _fastForward() {
+    final newPosition = Duration(
+      milliseconds: _currentPosition.inMilliseconds + 10000,
+    );
+    return _audioPlayer.seek(newPosition);
+  }
+
+  Future<void> _addFlashcard() async {
+    if (_isPlaying) {
+      await _playPause();
+    }
+
+    if (!mounted) return;
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => FlashcardEditorScreen(
           flashcard: Flashcard(
-              audioUrl: widget.audioUrl,
-              text: widget.episodeTitle,
+              text: '',
               translation: '',
+              audioUrl: widget.audioUrl,
               start: _currentPosition - Duration(seconds: 5),
               end: _currentPosition),
         ),
@@ -97,7 +112,7 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
     );
   }
 
-  Future<void> _addFlashcard(BuildContext context, Flashcard flashcard) async {
+  Future<void> _editFlashcard(BuildContext context, Flashcard flashcard) async {
     if (_isPlaying) {
       await _playPause();
     }
@@ -110,36 +125,6 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
         ),
       ),
     );
-  }
-
-  void _saveFlashcard(BuildContext context) {
-    if (_startTimestamp == null || _endTimestamp == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please mark both start and end timestamps.')),
-      );
-      return;
-    }
-
-    Provider.of<FlashcardProvider>(context, listen: false).addCard(
-      Flashcard(
-        text: widget.episodeTitle,
-        translation: _translationController.text,
-        audioUrl: widget.audioUrl,
-        start: _startTimestamp!,
-        end: _endTimestamp!,
-      ),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Flashcard saved!')),
-    );
-
-    // Clear the translation input and timestamps
-    setState(() {
-      _translationController.clear();
-      _startTimestamp = null;
-      _endTimestamp = null;
-    });
   }
 
   @override
@@ -183,9 +168,9 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
-                  icon: Icon(Icons.stop),
+                  icon: Icon(Icons.replay_10),
                   iconSize: 40,
-                  onPressed: _stop,
+                  onPressed: _rewind,
                 ),
                 IconButton(
                   icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
@@ -193,9 +178,14 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
                   onPressed: _playPause,
                 ),
                 IconButton(
+                  icon: Icon(Icons.forward_10),
+                  iconSize: 40,
+                  onPressed: _fastForward,
+                ),
+                IconButton(
                   icon: Icon(Icons.add_task),
                   iconSize: 40,
-                  onPressed: _addCard,
+                  onPressed: _addFlashcard,
                 ),
               ],
             ),
@@ -213,7 +203,7 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
                       return ListTile(
                         title: Text(flashcard.text),
                         subtitle: Text(flashcard.translation),
-                        onTap: () => _addFlashcard(context, flashcard),
+                        onTap: () => _editFlashcard(context, flashcard),
                         trailing: Text(
                           '${flashcard.start.inMinutes}:${flashcard.start.inSeconds.remainder(60).toString().padLeft(2, '0')} - '
                           '${flashcard.end.inMinutes}:${flashcard.end.inSeconds.remainder(60).toString().padLeft(2, '0')}',
