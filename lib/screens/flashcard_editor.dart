@@ -66,6 +66,16 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
           _isPlaying = false;
         });
       });
+
+      await _audioPlayer.play(UrlSource(widget.flashcard.audioUrl));
+
+      _currentPosition = _getDurationFromController(_startController);
+      _audioPlayer.seek(_currentPosition);
+      if (mounted) {
+        setState(() {
+          _isPlaying = true;
+        });
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error initializing audio: $e')),
@@ -149,11 +159,38 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
     setState(() {});
   }
 
+  double _getStart() {
+    final start = double.tryParse(_startController.text) ?? 0.0;
+    return start * 1000;
+  }
+
+  double _getEnd() {
+    double end = double.tryParse(_endController.text) ?? 0.0;
+    final start = double.tryParse(_startController.text) ?? 0.0;
+
+    if (start >= end) {
+      print("Start is greater than end");
+      _endController.text = (start + 1).toStringAsFixed(2);
+      end = start + 1;
+      setState(() {
+        _endController.text = end.toStringAsFixed(2);
+      });
+    }
+
+    return end * 1000;
+  }
+
   @override
   Widget build(BuildContext context) {
     final start = double.tryParse(_startController.text) ?? 0.0;
-    final end = double.tryParse(_endController.text) ?? 0.0;
+    double end = double.tryParse(_endController.text) ?? 0.0;
 
+    if (start >= end) {
+      end = start + 1;
+      _endController.text = end.toStringAsFixed(2);
+    }
+
+    print("Start: $start, End: $end");
     _currentPosition = Duration(
         milliseconds: _currentPosition.inMilliseconds
             .toDouble()
@@ -280,8 +317,8 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                           // Slider in its own row
                           Slider(
                             value: _currentPosition.inMilliseconds.toDouble(),
-                            min: start * 1000,
-                            max: end * 1000,
+                            min: _getStart(),
+                            max: _getEnd(),
                             onChanged: (value) {
                               final newPosition =
                                   Duration(milliseconds: value.toInt());
