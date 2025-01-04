@@ -39,24 +39,40 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
         text:
             (widget.flashcard.end.inMilliseconds / 1000.0).toStringAsFixed(2));
 
-    _audioPlayer.onPositionChanged.listen((position) {
-      if (!mounted) return; // Prevent setState if widget is disposed
-      setState(() {
-        _currentPosition = position;
+    _initAudio();
+  }
+
+  Future<void> _initAudio() async {
+    try {
+      _audioPlayer.onDurationChanged.listen((duration) {
+        if (!mounted) return;
+        setState(() {});
       });
 
-      final start = _getDurationFromController(_startController);
-      final end = _getDurationFromController(_endController);
+      _audioPlayer.onPositionChanged.listen((position) {
+        if (!mounted) return;
+        setState(() {
+          _currentPosition = position;
+          final endpos = _getDurationFromController(_endController);
+          if (_currentPosition > endpos) {
+            _currentPosition = _getDurationFromController(_startController);
+            _audioPlayer.seek(_currentPosition);
+          }
+        });
+      });
 
-      if (_currentPosition >= end || _currentPosition < start) {
-        _audioPlayer.pause();
-        if (mounted) {
-          setState(() {
-            _isPlaying = false;
-          });
-        }
-      }
-    });
+      _audioPlayer.onPlayerComplete.listen((event) {
+        setState(() {
+          _isPlaying = false;
+        });
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error initializing audio: $e')),
+      );
+    }
+
+    _currentPosition = _getDurationFromController(_startController);
   }
 
   Duration _getDurationFromController(TextEditingController controller) {
@@ -74,8 +90,6 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
   }
 
   Future<void> _playPause() async {
-    final start = _getDurationFromController(_startController);
-
     if (_isPlaying) {
       await _audioPlayer.pause();
       setState(() {
@@ -83,7 +97,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
       });
     } else {
       await _audioPlayer.play(UrlSource(widget.flashcard.audioUrl));
-      _audioPlayer.seek(start);
+      _audioPlayer.seek(_currentPosition);
       if (mounted) {
         setState(() {
           _isPlaying = true;
@@ -139,7 +153,15 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
   Widget build(BuildContext context) {
     final start = double.tryParse(_startController.text) ?? 0.0;
     final end = double.tryParse(_endController.text) ?? 0.0;
-    final snippetDuration = math.max(0, end - start).toDouble();
+
+    _currentPosition = Duration(
+        milliseconds: _currentPosition.inMilliseconds
+            .toDouble()
+            .clamp(
+              start * 1000,
+              end * 1000,
+            )
+            .toInt());
 
     bool isstarred = true;
     try {
@@ -148,17 +170,6 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
     } catch (e) {
       isstarred = false;
     }
-
-    // Ensure slider value is within bounds
-    final sliderValue = math
-        .max(
-          0,
-          math.min(
-            (_currentPosition.inMilliseconds / 1000.0 - start),
-            snippetDuration,
-          ),
-        )
-        .toDouble();
 
     return Scaffold(
       appBar: AppBar(
@@ -229,10 +240,16 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
 
             // Playback Slider
             Slider(
-              value: sliderValue,
-              min: 0.0,
-              max: snippetDuration,
-              onChanged: (_) {},
+              value: _currentPosition.inMilliseconds.toDouble(),
+              min: start * 1000,
+              max: end * 1000,
+              onChanged: (value) {
+                final newPosition = Duration(milliseconds: value.toInt());
+                _audioPlayer.seek(newPosition);
+                setState(() {
+                  _currentPosition = newPosition;
+                });
+              },
             ),
             Text(
               'Position: ${_currentPosition.inMilliseconds / 1000.0}s',
