@@ -192,79 +192,203 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
             ),
             SizedBox(height: 16),
 
-            // Start and End Time Controls
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey, // Set the color of the border
-                        width: 1.0, // Set the width of the border
-                      ),
-                      borderRadius: BorderRadius.circular(
-                          4.0), // Mimic the rounded corners of OutlineInputBorder
-                    ),
-                    child: Text(
-                      _startController.text,
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.remove),
-                  onPressed: () => _adjustTime(_startController, -0.1),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () => _adjustTime(_startController, 0.1),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey, // Set the color of the border
-                        width: 1.0, // Set the width of the border
-                      ),
-                      borderRadius: BorderRadius.circular(
-                          4.0), // Mimic the rounded corners of OutlineInputBorder
-                    ),
-                    child: Text(
-                      _endController.text,
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.remove),
-                  onPressed: () => _adjustTime(_endController, -0.1),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () => _adjustTime(_endController, 0.1),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
+            // Dynamic layout for controls and slider
+            LayoutBuilder(
+              builder: (context, constraints) {
+                bool isSmallScreen = constraints.maxWidth < 600;
 
-            // Playback Slider
-            Slider(
-              value: _currentPosition.inMilliseconds.toDouble(),
-              min: start * 1000,
-              max: end * 1000,
-              onChanged: (value) {
-                final newPosition = Duration(milliseconds: value.toInt());
-                _audioPlayer.seek(newPosition);
-                setState(() {
-                  _currentPosition = newPosition;
-                });
+                return Column(
+                  children: [
+                    if (isSmallScreen)
+                      Column(
+                        children: [
+                          // Start and End Controls on one row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Start Control
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.remove),
+                                    onPressed: () =>
+                                        _adjustTime(_startController, -0.1),
+                                  ),
+                                  Container(
+                                    width: 80,
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8.0,
+                                      horizontal: 12.0,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(4.0),
+                                    ),
+                                    child: Text(
+                                      _startController.text,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 16.0),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.add),
+                                    onPressed: () =>
+                                        _adjustTime(_startController, 0.1),
+                                  ),
+                                ],
+                              ),
+                              // End Control
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.remove),
+                                    onPressed: () =>
+                                        _adjustTime(_endController, -0.1),
+                                  ),
+                                  Container(
+                                    width: 80,
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 8.0,
+                                      horizontal: 12.0,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.grey,
+                                        width: 1.0,
+                                      ),
+                                      borderRadius: BorderRadius.circular(4.0),
+                                    ),
+                                    child: Text(
+                                      _endController.text,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 16.0),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.add),
+                                    onPressed: () =>
+                                        _adjustTime(_endController, 0.1),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16), // Space between rows
+                          // Slider in its own row
+                          Slider(
+                            value: _currentPosition.inMilliseconds.toDouble(),
+                            min: start * 1000,
+                            max: end * 1000,
+                            onChanged: (value) {
+                              final newPosition =
+                                  Duration(milliseconds: value.toInt());
+                              _audioPlayer.seek(newPosition);
+                              setState(() {
+                                _currentPosition = newPosition;
+                              });
+                            },
+                          ),
+                        ],
+                      )
+                    else
+                      // Wide Screen Layout
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Start Control
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.remove),
+                                onPressed: () =>
+                                    _adjustTime(_startController, -0.1),
+                              ),
+                              Container(
+                                width: 80,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                  horizontal: 12.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.grey,
+                                    width: 1.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                                child: Text(
+                                  _startController.text,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 16.0),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.add),
+                                onPressed: () =>
+                                    _adjustTime(_startController, 0.1),
+                              ),
+                            ],
+                          ),
+                          // Playback Slider
+                          Expanded(
+                            child: Slider(
+                              value: _currentPosition.inMilliseconds.toDouble(),
+                              min: start * 1000,
+                              max: end * 1000,
+                              onChanged: (value) {
+                                final newPosition =
+                                    Duration(milliseconds: value.toInt());
+                                _audioPlayer.seek(newPosition);
+                                setState(() {
+                                  _currentPosition = newPosition;
+                                });
+                              },
+                            ),
+                          ),
+                          // End Control
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.remove),
+                                onPressed: () =>
+                                    _adjustTime(_endController, -0.1),
+                              ),
+                              Container(
+                                width: 80,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                  horizontal: 12.0,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.grey,
+                                    width: 1.0,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                                child: Text(
+                                  _endController.text,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 16.0),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.add),
+                                onPressed: () =>
+                                    _adjustTime(_endController, 0.1),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                  ],
+                );
               },
             ),
+            SizedBox(height: 16),
             Text(
               'Position: ${_currentPosition.inMilliseconds / 1000.0}s',
             ),
