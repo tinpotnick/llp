@@ -28,16 +28,17 @@ class UserFlashcardStatus {
       'lastReviewed': lastReviewed.toIso8601String(),
       'nextDue': nextDue.toIso8601String(),
       'interval': interval,
+      'attempts': attempts
     };
   }
 
   factory UserFlashcardStatus.fromJson(Map<String, dynamic> json) {
     return UserFlashcardStatus(
       flashcardUuid: json['flashcardUuid'],
-      lastReviewed: json['lastReviewed'],
-      nextDue: json['nextDue'],
-      interval: json['interval'],
-      attempts: json['attempts'],
+      lastReviewed: DateTime.parse(json['lastReviewed']),
+      nextDue: DateTime.parse(json['nextDue']),
+      interval: json['interval'] ?? 1,
+      attempts: json['attempts'] ?? 0,
     );
   }
 
