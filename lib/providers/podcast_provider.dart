@@ -27,11 +27,9 @@ class PodcastProvider with ChangeNotifier {
   }
 
   Future<void> _saveToStorage() async {
-    print("savig to fiale");
     final prefs = await SharedPreferences.getInstance();
     final cardsJson = _podcasts.values.map((pcast) => pcast.toJson()).toList();
     await prefs.setString('podcasts', json.encode(cardsJson));
-    print("saved to file");
   }
 
   Future<void> loadFromStorage() async {
@@ -42,11 +40,12 @@ class PodcastProvider with ChangeNotifier {
     }
 
     final List<dynamic> decoded = json.decode(podcastsJsonstr);
+    _podcasts = {};
 
-    _podcasts = {
-      for (var json in decoded)
-        Podcast.fromJson(json).url: Podcast.fromJson(json)
-    };
+    for (var json in decoded) {
+      final podcast = Podcast.fromJson(json);
+      _podcasts[podcast.url] = podcast;
+    }
 
     notifyListeners();
   }
