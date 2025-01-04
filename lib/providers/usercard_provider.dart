@@ -29,13 +29,13 @@ class UserCardProvider with ChangeNotifier {
   }
 
   void updateCard(UserFlashcardStatus card) {
-    _userStatus[card.uuid] = card;
+    _userStatus[card.flashcardUuid] = card;
     _saveToStorage();
     notifyListeners();
   }
 
   void removeCard(UserFlashcardStatus card) {
-    _userStatus.remove(card.uuid);
+    _userStatus.remove(card.flashcardUuid);
     _saveToStorage();
     notifyListeners();
   }
@@ -47,21 +47,24 @@ class UserCardProvider with ChangeNotifier {
   Future<void> _saveToStorage() async {
     final prefs = await SharedPreferences.getInstance();
     final cardsJson = _userStatus.values.map((card) => card.toJson()).toList();
-    await prefs.setString('flashcards', json.encode(cardsJson));
+    await prefs.setString('usercards', json.encode(cardsJson));
   }
 
   Future<void> loadFromStorage() async {
     final prefs = await SharedPreferences.getInstance();
     final cardsJsonString = prefs.getString('usercards');
-    if (cardsJsonString != null) {
-      final List<dynamic> decoded = json.decode(cardsJsonString);
-
-      _userStatus = {
-        for (var json in decoded)
-          Flashcard.fromJson(json).uuid: UserFlashcardStatus.fromJson(json)
-      };
-
-      notifyListeners();
+    if (cardsJsonString == null) {
+      return;
     }
+
+    final List<dynamic> decoded = json.decode(cardsJsonString);
+    _userStatus = {};
+
+    for (var json in decoded) {
+      final usercard = UserFlashcardStatus.fromJson(json);
+      _userStatus[usercard.flashcardUuid] = usercard;
+    }
+
+    notifyListeners();
   }
 }
