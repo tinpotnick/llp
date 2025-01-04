@@ -210,7 +210,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                               Row(
                                 children: [
                                   IconButton(
-                                    icon: Icon(Icons.remove),
+                                    icon: Icon(Icons.replay_10),
                                     onPressed: () =>
                                         _adjustTime(_startController, -0.1),
                                   ),
@@ -234,7 +234,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                                     ),
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.add),
+                                    icon: Icon(Icons.forward_10),
                                     onPressed: () =>
                                         _adjustTime(_startController, 0.1),
                                   ),
@@ -244,7 +244,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                               Row(
                                 children: [
                                   IconButton(
-                                    icon: Icon(Icons.remove),
+                                    icon: Icon(Icons.replay_10),
                                     onPressed: () =>
                                         _adjustTime(_endController, -0.1),
                                   ),
@@ -268,7 +268,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                                     ),
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.add),
+                                    icon: Icon(Icons.forward_10),
                                     onPressed: () =>
                                         _adjustTime(_endController, 0.1),
                                   ),
@@ -302,7 +302,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.remove),
+                                icon: Icon(Icons.replay_10),
                                 onPressed: () =>
                                     _adjustTime(_startController, -0.1),
                               ),
@@ -326,7 +326,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.add),
+                                icon: Icon(Icons.forward_10),
                                 onPressed: () =>
                                     _adjustTime(_startController, 0.1),
                               ),
@@ -352,7 +352,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.remove),
+                                icon: Icon(Icons.replay_10),
                                 onPressed: () =>
                                     _adjustTime(_endController, -0.1),
                               ),
@@ -376,7 +376,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.add),
+                                icon: Icon(Icons.forward_10),
                                 onPressed: () =>
                                     _adjustTime(_endController, 0.1),
                               ),
