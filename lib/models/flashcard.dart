@@ -34,14 +34,13 @@ class Flashcard {
     };
   }
 
-//Arabic (Levantine) Language: Level 2 Part 1 - Evening Course
   static Flashcard fromJson(Map<String, dynamic> json) {
     return Flashcard(
         uuid: json['uuid'],
-        text: json['text'],
-        translation: json['translation'],
-        audioUrl: json['audioUrl'],
-        start: Duration(milliseconds: json['start']),
-        end: Duration(milliseconds: json['end']));
+        text: json['text'] ?? '',
+        translation: json['translation'] ?? '',
+        audioUrl: json['audioUrl'] ?? '',
+        start: Duration(milliseconds: json['start'] ?? 0),
+        end: Duration(milliseconds: json['end'] ?? 0));
   }
 }
