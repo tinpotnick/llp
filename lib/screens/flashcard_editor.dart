@@ -135,28 +135,33 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
       return;
     }
 
-    Provider.of<FlashcardProvider>(context, listen: false)
-        .updateCard(widget.flashcard);
+    Provider.of<FlashcardProvider>(context, listen: false).updateCard(Flashcard(
+      uuid: widget.flashcard.uuid,
+      text: widget.flashcard.text,
+      translation: _translationController.text,
+      audioUrl: widget.flashcard.audioUrl,
+      start: newStart,
+      end: newEnd,
+    ));
 
     Navigator.pop(context);
   }
 
   void _starFlashcard() {
-    UserFlashcardStatus userflashcard;
+    setState(() {
+      UserFlashcardStatus userflashcard;
 
-    try {
-      userflashcard = Provider.of<UserCardProvider>(context, listen: false)
-          .getUserCard(widget.flashcard);
-    } catch (e) {
+      try {
+        userflashcard = Provider.of<UserCardProvider>(context, listen: false)
+            .getUserCard(widget.flashcard);
+      } catch (e) {
+        Provider.of<UserCardProvider>(context, listen: false)
+            .addCard(widget.flashcard);
+        return;
+      }
       Provider.of<UserCardProvider>(context, listen: false)
-          .addCard(widget.flashcard);
-      return;
-    }
-
-    Provider.of<UserCardProvider>(context, listen: false)
-        .removeCard(userflashcard);
-
-    setState(() {});
+          .removeCard(userflashcard);
+    });
   }
 
   double _getStart() {
@@ -169,7 +174,6 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
     final start = double.tryParse(_startController.text) ?? 0.0;
 
     if (start >= end) {
-      print("Start is greater than end");
       _endController.text = (start + 1).toStringAsFixed(2);
       end = start + 1;
       setState(() {
@@ -190,7 +194,6 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
       _endController.text = end.toStringAsFixed(2);
     }
 
-    print("Start: $start, End: $end");
     _currentPosition = Duration(
         milliseconds: _currentPosition.inMilliseconds
             .toDouble()
@@ -283,6 +286,11 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                                   IconButton(
                                     icon: Icon(Icons.replay_10),
                                     onPressed: () =>
+                                        _adjustTime(_endController, -10),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.replay_5),
+                                    onPressed: () =>
                                         _adjustTime(_endController, -0.1),
                                   ),
                                   Container(
@@ -305,9 +313,14 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                                     ),
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.forward_10),
+                                    icon: Icon(Icons.forward_5),
                                     onPressed: () =>
                                         _adjustTime(_endController, 0.1),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.forward_10),
+                                    onPressed: () =>
+                                        _adjustTime(_endController, 10),
                                   ),
                                 ],
                               ),
@@ -341,6 +354,11 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                               IconButton(
                                 icon: Icon(Icons.replay_10),
                                 onPressed: () =>
+                                    _adjustTime(_startController, -10),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.replay_5),
+                                onPressed: () =>
                                     _adjustTime(_startController, -0.1),
                               ),
                               Container(
@@ -363,9 +381,14 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.forward_10),
+                                icon: Icon(Icons.forward_5),
                                 onPressed: () =>
                                     _adjustTime(_startController, 0.1),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.forward_10),
+                                onPressed: () =>
+                                    _adjustTime(_startController, 10),
                               ),
                             ],
                           ),
@@ -391,6 +414,11 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                               IconButton(
                                 icon: Icon(Icons.replay_10),
                                 onPressed: () =>
+                                    _adjustTime(_endController, 10),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.replay_5),
+                                onPressed: () =>
                                     _adjustTime(_endController, -0.1),
                               ),
                               Container(
@@ -413,9 +441,14 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.forward_10),
+                                icon: Icon(Icons.forward_5),
                                 onPressed: () =>
                                     _adjustTime(_endController, 0.1),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.forward_10),
+                                onPressed: () =>
+                                    _adjustTime(_endController, 10),
                               ),
                             ],
                           ),
@@ -433,19 +466,23 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
 
             // Play/Pause Button
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
                   onPressed: _playPause,
                   icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
+                  iconSize: 40,
                 ),
                 IconButton(
                   onPressed: _saveFlashcard,
                   icon: Icon(Icons.save),
+                  iconSize: 40,
                 ),
                 IconButton(
                   onPressed: _starFlashcard,
                   icon:
                       Icon(isstarred ? Icons.star : Icons.star_border_outlined),
+                  iconSize: 40,
                 ),
               ],
             ),
