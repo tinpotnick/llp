@@ -48,6 +48,7 @@ class _FlashcardTileState extends State<FlashcardTile> {
     });
 
     _audioPlayer.onPositionChanged.listen((position) {
+      if (!mounted) return;
       final flashcard =
           widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
 
