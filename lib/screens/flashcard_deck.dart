@@ -20,15 +20,14 @@ class _FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
       ),
       body: Consumer<UserCardProvider>(
         builder: (context, usercardProvider, child) {
-          final userflashcards = usercardProvider.userCards;
-          final flashcardList = userflashcards.values.toList();
+          final flashcardList = usercardProvider.getDueCards();
 
-          if (userflashcards.isEmpty) {
+          if (flashcardList.isEmpty) {
             return Center(child: Text('No flashcards available.'));
           }
 
           return ListView.builder(
-            itemCount: userflashcards.length,
+            itemCount: flashcardList.length,
             itemBuilder: (context, index) {
               final flashcard = flashcardList[index];
               return FlashcardTile(

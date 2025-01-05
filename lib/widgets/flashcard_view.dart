@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../models/usercard.dart';
+import 'package:provider/provider.dart';
 import '../providers/usercard_provider.dart';
 import 'dart:math' as math;
 
@@ -70,6 +71,26 @@ class _FlashcardTileState extends State<FlashcardTile> {
     });
   }
 
+  _gradeCard(int interval) {
+    widget.flashcard.attempts += 1;
+
+    if (interval == 0) {
+      widget.flashcard.interval = 0;
+    } else {
+      widget.flashcard.interval = widget.flashcard.interval + interval;
+    }
+
+    widget.flashcard.lastReviewed = DateTime.now();
+    widget.flashcard.nextDue = DateTime.now().add(
+      Duration(days: widget.flashcard.interval),
+    );
+
+    setState(() {
+      Provider.of<UserCardProvider>(context, listen: false)
+          .updateCard(widget.flashcard);
+    });
+  }
+
   @override
   void dispose() {
     _audioPlayer.dispose();
@@ -133,13 +154,13 @@ class _FlashcardTileState extends State<FlashcardTile> {
 
             // View button and revealed content
             if (!_isRevealed)
-              ElevatedButton(
+              IconButton(
                 onPressed: () {
                   setState(() {
                     _isRevealed = true;
                   });
                 },
-                child: Text('View'),
+                icon: Icon(Icons.remove_red_eye),
               )
             else
               Column(
@@ -149,41 +170,21 @@ class _FlashcardTileState extends State<FlashcardTile> {
                   SizedBox(height: 8),
                   OverflowBar(
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Graded as Hard')),
-                          );
-                        },
+                      IconButton(
+                        onPressed: () => _gradeCard(0),
                         icon: Icon(Icons.thumb_down),
-                        label: Text('+1m'),
                       ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Graded as Good')),
-                          );
-                        },
+                      IconButton(
+                        onPressed: () => _gradeCard(1),
                         icon: Icon(Icons.thumbs_up_down),
-                        label: Text('+2d'),
                       ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Graded as Easy')),
-                          );
-                        },
+                      IconButton(
+                        onPressed: () => _gradeCard(2),
                         icon: Icon(Icons.thumb_up),
-                        label: Text('+2d'),
                       ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Graded as Easy')),
-                          );
-                        },
+                      IconButton(
+                        onPressed: () => _gradeCard(3),
                         icon: Icon(Icons.sentiment_very_satisfied),
-                        label: Text('+4d'),
                       ),
                     ],
                   ),

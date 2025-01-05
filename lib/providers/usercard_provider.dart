@@ -18,6 +18,21 @@ class UserCardProvider with ChangeNotifier {
     return _userStatus[card.uuid]!;
   }
 
+  List<UserFlashcardStatus> getDueCards() {
+    final List<UserFlashcardStatus> dueCards = [];
+
+    for (var card in _userStatus.entries) {
+      if (card.value.nextDue.isBefore(DateTime.now())) {
+        dueCards.add(card.value);
+      }
+    }
+
+    // Sort the list by `nextDue`
+    dueCards.sort((a, b) => a.nextDue.compareTo(b.nextDue));
+
+    return dueCards;
+  }
+
   void addCard(Flashcard card) {
     _userStatus[card.uuid] = UserFlashcardStatus(
       flashcardUuid: card.uuid,
