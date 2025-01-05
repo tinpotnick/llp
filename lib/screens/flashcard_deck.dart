@@ -31,6 +31,7 @@ class _FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
             itemBuilder: (context, index) {
               final flashcard = flashcardList[index];
               return FlashcardTile(
+                key: ValueKey(flashcard.uuid),
                 userCardProvider: usercardProvider,
                 flashcard: flashcard,
                 onDelete: () {
