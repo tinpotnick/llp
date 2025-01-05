@@ -147,23 +147,22 @@ class _FlashcardTileState extends State<FlashcardTile> {
                       icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
                       onPressed: _playPause,
                     ),
+                    if (!_isRevealed)
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isRevealed = true;
+                          });
+                        },
+                        icon: Icon(Icons.remove_red_eye),
+                      )
                   ],
                 ),
               ],
             ),
             SizedBox(height: 8),
-
             // View button and revealed content
-            if (!_isRevealed)
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    _isRevealed = true;
-                  });
-                },
-                icon: Icon(Icons.remove_red_eye),
-              )
-            else
+            if (_isRevealed)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
