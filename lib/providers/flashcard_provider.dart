@@ -25,6 +25,10 @@ class FlashcardProvider with ChangeNotifier {
   void addCard(Flashcard card) => addOrUpdateCard(card);
   void updateCard(Flashcard card) => addOrUpdateCard(card);
 
+  bool hasCard(String uuid) {
+    return _allCards.containsKey(uuid);
+  }
+
   void removeCard(String uuid) {
     _allCards.remove(uuid);
     _saveToStorage();

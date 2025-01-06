@@ -135,14 +135,31 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
       return;
     }
 
-    Provider.of<FlashcardProvider>(context, listen: false).updateCard(Flashcard(
-      uuid: widget.flashcard.uuid,
-      text: widget.flashcard.text,
-      translation: _translationController.text,
-      audioUrl: widget.flashcard.audioUrl,
-      start: newStart,
-      end: newEnd,
-    ));
+    final flashcardprovider =
+        Provider.of<FlashcardProvider>(context, listen: false);
+
+    if (flashcardprovider.hasCard(widget.flashcard.uuid)) {
+      flashcardprovider.updateCard(Flashcard(
+        uuid: widget.flashcard.uuid,
+        text: widget.flashcard.text,
+        translation: _translationController.text,
+        audioUrl: widget.flashcard.audioUrl,
+        start: newStart,
+        end: newEnd,
+      ));
+    } else {
+      final newcard = Flashcard(
+        uuid: widget.flashcard.uuid,
+        text: widget.flashcard.text,
+        translation: _translationController.text,
+        audioUrl: widget.flashcard.audioUrl,
+        start: newStart,
+        end: newEnd,
+      );
+
+      flashcardprovider.addCard(newcard);
+      Provider.of<UserCardProvider>(context, listen: false).addCard(newcard);
+    }
 
     Navigator.pop(context);
   }
@@ -414,7 +431,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                               IconButton(
                                 icon: Icon(Icons.replay_10),
                                 onPressed: () =>
-                                    _adjustTime(_endController, 10),
+                                    _adjustTime(_endController, -10),
                               ),
                               IconButton(
                                 icon: Icon(Icons.replay_5),
