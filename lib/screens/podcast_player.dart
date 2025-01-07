@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
 import '../models/flashcard.dart';
 import '../providers/flashcard_provider.dart';
+
+import '../services/podcast_service.dart';
 
 import 'flashcard_editor.dart';
 
@@ -24,10 +29,12 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   final TextEditingController _translationController = TextEditingController();
   bool _isPlaying = false;
+  bool _isBuffering = false;
+  bool _isDownloaded = false;
+  bool _isDownloading = false;
+  double _downloadProgress = 0.0; // Download progress indicator
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
-  Duration? _startTimestamp;
-  Duration? _endTimestamp;
 
   @override
   void initState() {
@@ -37,10 +44,26 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
 
   Future<void> _initAudio() async {
     try {
-      _audioPlayer.onPositionChanged.listen((position) {
+      _audioPlayer.onPositionChanged.listen((position) async {
+        print("Position changed: $position");
         if (!mounted) return;
+
+        if (_totalDuration == Duration.zero) {
+          final duration = await _audioPlayer.getDuration();
+          if (duration == null) {
+            _totalDuration = position;
+          } else {
+            _totalDuration = duration;
+          }
+        }
+
+        if (position > _totalDuration) {
+          _totalDuration = position;
+        }
+
         setState(() {
           _currentPosition = position;
+          _isBuffering = false;
         });
       });
 
@@ -49,6 +72,13 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
         setState(() {
           _totalDuration = duration;
         });
+
+        if (duration == Duration.zero) {
+          // Duration is zero, likely buffering
+          setState(() {
+            _isBuffering = true;
+          });
+        }
       });
 
       _audioPlayer.onPlayerComplete.listen((event) {
@@ -58,22 +88,52 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
           _currentPosition = Duration.zero;
         });
       });
+
+      _audioPlayer.onPlayerStateChanged.listen((state) {
+        if (!mounted) return;
+        setState(() {
+          if (state == PlayerState.playing) {
+            _isBuffering = false; // Playback has started
+            _isPlaying = true;
+          } else if (state == PlayerState.paused ||
+              state == PlayerState.stopped) {
+            _isBuffering = false;
+            _isPlaying = false;
+          }
+        });
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error initializing audio: $e')),
       );
     }
+
+    _isDownloaded = await PodcastService.hasDownload(widget.audioUrl);
+    setState(() {});
   }
 
   Future<void> _playPause() async {
     if (_isPlaying) {
       await _audioPlayer.pause();
+      _isPlaying = false;
     } else {
-      await _audioPlayer.play(UrlSource(widget.audioUrl));
+      final isLocal = await PodcastService.hasDownload(widget.audioUrl);
+
+      if (isLocal) {
+        final filePath =
+            await PodcastService.getLocalPodcastFilePath(widget.audioUrl);
+
+        await _audioPlayer.play(DeviceFileSource(filePath));
+        _isBuffering = false;
+        _isPlaying = true;
+      } else {
+        await _audioPlayer.play(UrlSource(widget.audioUrl));
+
+        _isBuffering = true;
+        _isPlaying = true;
+      }
     }
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
+    setState(() {});
   }
 
   Future<void> _rewind() {
@@ -88,6 +148,46 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
       milliseconds: _currentPosition.inMilliseconds + 10000,
     );
     return _audioPlayer.seek(newPosition);
+  }
+
+  Future<void> _startDownload() async {
+    setState(() {
+      _isDownloading = true;
+      _downloadProgress = 0.0;
+    });
+
+    await PodcastService.downloadPodcast(widget.audioUrl,
+        onProgress: (progress) {
+      setState(() {
+        _downloadProgress = progress;
+      });
+    });
+
+    setState(() {
+      _isDownloaded = true;
+      _isDownloading = false;
+    });
+  }
+
+  Future<void> _toggleDownload() async {
+    if (_isDownloaded) {
+      // Remove the downloaded file
+      final filePath =
+          await PodcastService.getLocalPodcastFilePath(widget.audioUrl);
+      final file = File(filePath);
+      if (await file.exists()) {
+        await file.delete();
+        setState(() {
+          _isDownloaded = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Download removed')),
+        );
+      }
+    } else {
+      // Start the download process
+      await _startDownload();
+    }
   }
 
   Future<void> _addFlashcard() async {
@@ -148,6 +248,7 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
             // Display playback progress
             Slider(
               value: _currentPosition.inMilliseconds.toDouble(),
+              min: 0,
               max: _totalDuration.inMilliseconds.toDouble(),
               onChanged: (value) {
                 final newPosition = Duration(milliseconds: value.toInt());
@@ -167,6 +268,14 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                if (_isBuffering)
+                  Column(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 8),
+                      Text("Buffering..."),
+                    ],
+                  ),
                 IconButton(
                   icon: Icon(Icons.replay_10),
                   iconSize: 40,
@@ -181,6 +290,24 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
                   icon: Icon(Icons.forward_10),
                   iconSize: 40,
                   onPressed: _fastForward,
+                ),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (_isDownloading)
+                      CircularProgressIndicator(
+                        value: _downloadProgress,
+                        strokeWidth: 2.0,
+                        backgroundColor: Colors.grey[300],
+                      ),
+                    IconButton(
+                      icon: Icon(
+                        _isDownloaded ? Icons.download_done : Icons.download,
+                      ),
+                      iconSize: 40,
+                      onPressed: _toggleDownload,
+                    ),
+                  ],
                 ),
                 IconButton(
                   icon: Icon(Icons.add_task),

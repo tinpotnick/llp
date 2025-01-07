@@ -2,6 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/podcast.dart';
 
+import 'dart:io';
+import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+
 class ItunePodcast {
   final String name;
   final String artistName;
@@ -68,5 +73,44 @@ class PodcastService {
     }
 
     return Podcast.fromRss(ipod.feedUrl, response.body);
+  }
+
+  /// Checks if the podcast file exists locally
+  static Future<bool> hasDownload(String url) async {
+    final filePath = await getLocalPodcastFilePath(url);
+    final file = File(filePath);
+    return file.exists();
+  }
+
+  /// Downloads the podcast file and provides a callback for progress updates
+  /// Saves the file in the format `url.mp3 - <md5>.mp3`.
+  static Future<void> downloadPodcast(
+    String url, {
+    required Function(double) onProgress,
+  }) async {
+    try {
+      final filePath = await getLocalPodcastFilePath(url);
+      final dio = Dio();
+
+      await dio.download(
+        url,
+        filePath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            onProgress(received / total);
+          }
+        },
+      );
+    } catch (e) {
+      throw Exception('Failed to download podcast: $e');
+    }
+  }
+
+  /// Generates the file path using the MD5 hash of the URL
+  static Future<String> getLocalPodcastFilePath(String url) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final md5Hash = md5.convert(utf8.encode(url)).toString();
+    final extension = url.split('.').last;
+    return '${directory.path}/$md5Hash.$extension';
   }
 }
