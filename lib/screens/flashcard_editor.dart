@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'dart:math' as math;
 import 'package:provider/provider.dart';
 import '../models/flashcard.dart';
 import '../models/usercard.dart';
@@ -63,6 +62,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
       });
 
       AudioPlayerManager().onPlayerComplete.listen((event) {
+        if (!mounted) return;
         setState(() {
           _isPlaying = false;
         });
@@ -100,6 +100,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
   }
 
   Future<void> _playPause() async {
+    if (!mounted) return;
     if (_isPlaying) {
       await AudioPlayerManager().pause();
       setState(() {
@@ -179,6 +180,24 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
       Provider.of<UserCardProvider>(context, listen: false)
           .removeCard(userflashcard);
     });
+  }
+
+  void _removeFlashcard() {
+    try {
+      UserFlashcardStatus userflashcard =
+          Provider.of<UserCardProvider>(context, listen: false)
+              .getUserCard(widget.flashcard);
+
+      Provider.of<UserCardProvider>(context, listen: false)
+          .removeCard(userflashcard);
+    } catch (e) {
+      /* silent */
+    }
+
+    Provider.of<FlashcardProvider>(context, listen: false)
+        .removeCard(widget.flashcard.uuid);
+
+    Navigator.pop(context);
   }
 
   double _getStart() {
@@ -488,18 +507,19 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                 IconButton(
                   onPressed: _playPause,
                   icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-                  iconSize: 40,
                 ),
                 IconButton(
                   onPressed: _saveFlashcard,
                   icon: Icon(Icons.save),
-                  iconSize: 40,
                 ),
                 IconButton(
                   onPressed: _starFlashcard,
                   icon:
                       Icon(isstarred ? Icons.star : Icons.star_border_outlined),
-                  iconSize: 40,
+                ),
+                IconButton(
+                  onPressed: _removeFlashcard,
+                  icon: Icon(Icons.delete_forever),
                 ),
               ],
             ),

@@ -35,20 +35,22 @@ class _PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
 
   Future<void> _initAudio() async {
     AudioPlayerManager().onPositionChanged.listen((position) {
+      widget.onPositionChanged(position);
+      if (!mounted) return;
       setState(() {
         _currentPosition = position;
       });
     });
 
     AudioPlayerManager().onDurationChanged.listen((duration) {
+      if (!mounted) return;
       setState(() {
         _totalDuration = duration;
       });
-
-      widget.onPositionChanged(duration);
     });
 
     AudioPlayerManager().onPlayerStateChanged.listen((state) {
+      if (!mounted) return;
       setState(() {
         _isPlaying = state == PlayerState.playing;
       });
@@ -83,6 +85,7 @@ class _PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
   }
 
   Future<void> _toggleDownload() async {
+    if (!mounted) return;
     if (_isDownloaded) {
       final filePath =
           await PodcastService.getLocalPodcastFilePath(widget.audioUrl);
@@ -104,6 +107,7 @@ class _PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
 
   @override
   void dispose() {
+    AudioPlayerManager().pause();
     super.dispose();
   }
 

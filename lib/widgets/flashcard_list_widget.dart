@@ -25,7 +25,7 @@ class FlashcardListWidget extends StatelessWidget {
 
   Future<void> _addFlashcard(BuildContext context) async {
     Duration currentPosition = getPosition();
-
+    print(currentPosition);
     Navigator.push(
       context,
       MaterialPageRoute(
