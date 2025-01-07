@@ -7,6 +7,8 @@ import '../models/usercard.dart';
 import '../providers/flashcard_provider.dart';
 import '../providers/usercard_provider.dart';
 
+import '../services/audio_player_manager.dart';
+
 class FlashcardEditorScreen extends StatefulWidget {
   final Flashcard flashcard;
 
@@ -19,7 +21,6 @@ class FlashcardEditorScreen extends StatefulWidget {
 }
 
 class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
   late TextEditingController _translationController;
   late TextEditingController _startController;
   late TextEditingController _endController;
@@ -44,33 +45,33 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
 
   Future<void> _initAudio() async {
     try {
-      _audioPlayer.onDurationChanged.listen((duration) {
+      AudioPlayerManager().onDurationChanged.listen((duration) {
         if (!mounted) return;
         setState(() {});
       });
 
-      _audioPlayer.onPositionChanged.listen((position) {
+      AudioPlayerManager().onPositionChanged.listen((position) {
         if (!mounted) return;
         setState(() {
           _currentPosition = position;
           final endpos = _getDurationFromController(_endController);
           if (_currentPosition > endpos) {
             _currentPosition = _getDurationFromController(_startController);
-            _audioPlayer.seek(_currentPosition);
+            AudioPlayerManager().seek(_currentPosition);
           }
         });
       });
 
-      _audioPlayer.onPlayerComplete.listen((event) {
+      AudioPlayerManager().onPlayerComplete.listen((event) {
         setState(() {
           _isPlaying = false;
         });
       });
 
-      await _audioPlayer.play(UrlSource(widget.flashcard.audioUrl));
+      await AudioPlayerManager().play(UrlSource(widget.flashcard.audioUrl));
 
       _currentPosition = _getDurationFromController(_startController);
-      _audioPlayer.seek(_currentPosition);
+      AudioPlayerManager().seek(_currentPosition);
       if (mounted) {
         setState(() {
           _isPlaying = true;
@@ -92,7 +93,6 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
 
   @override
   void dispose() {
-    _audioPlayer.dispose(); // Dispose audio player
     _translationController.dispose();
     _startController.dispose();
     _endController.dispose();
@@ -101,13 +101,13 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
 
   Future<void> _playPause() async {
     if (_isPlaying) {
-      await _audioPlayer.pause();
+      await AudioPlayerManager().pause();
       setState(() {
         _isPlaying = false;
       });
     } else {
-      await _audioPlayer.play(UrlSource(widget.flashcard.audioUrl));
-      _audioPlayer.seek(_currentPosition);
+      await AudioPlayerManager().play(UrlSource(widget.flashcard.audioUrl));
+      await AudioPlayerManager().seek(_currentPosition);
       if (mounted) {
         setState(() {
           _isPlaying = true;
@@ -352,7 +352,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                             onChanged: (value) {
                               final newPosition =
                                   Duration(milliseconds: value.toInt());
-                              _audioPlayer.seek(newPosition);
+                              AudioPlayerManager().seek(newPosition);
                               setState(() {
                                 _currentPosition = newPosition;
                               });
@@ -418,7 +418,7 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                               onChanged: (value) {
                                 final newPosition =
                                     Duration(milliseconds: value.toInt());
-                                _audioPlayer.seek(newPosition);
+                                AudioPlayerManager().seek(newPosition);
                                 setState(() {
                                   _currentPosition = newPosition;
                                 });
