@@ -45,7 +45,6 @@ class _PodcastPlayerScreenState extends State<PodcastPlayerScreen> {
   Future<void> _initAudio() async {
     try {
       _audioPlayer.onPositionChanged.listen((position) async {
-        print("Position changed: $position");
         if (!mounted) return;
 
         if (_totalDuration == Duration.zero) {
