@@ -123,6 +123,12 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
     setState(() {});
   }
 
+  void _setTime(TextEditingController controller) {
+    controller.text =
+        (_currentPosition.inMilliseconds / 1000.0).toStringAsFixed(2);
+    setState(() {});
+  }
+
   void _saveFlashcard() {
     final newStart = _getDurationFromController(_startController);
     final newEnd = _getDurationFromController(_endController);
@@ -286,77 +292,37 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                               Row(
                                 children: [
                                   IconButton(
-                                    icon: Icon(Icons.replay_10),
+                                    icon: Icon(Icons.replay_5),
                                     onPressed: () =>
-                                        _adjustTime(_startController, -0.1),
-                                  ),
-                                  Container(
-                                    width: 80,
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 8.0,
-                                      horizontal: 12.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey,
-                                        width: 1.0,
-                                      ),
-                                      borderRadius: BorderRadius.circular(4.0),
-                                    ),
-                                    child: Text(
-                                      _startController.text,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 16.0),
-                                    ),
+                                        _adjustTime(_startController, -5),
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.forward_10),
-                                    onPressed: () =>
-                                        _adjustTime(_startController, 0.1),
+                                    icon: Icon(Icons.crop),
+                                    onPressed: () => _setTime(_startController),
+                                  ),
+                                  Text(
+                                    _startController.text,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontSize: 16.0),
                                   ),
                                 ],
                               ),
                               // End Control
                               Row(
                                 children: [
-                                  IconButton(
-                                    icon: Icon(Icons.replay_10),
-                                    onPressed: () =>
-                                        _adjustTime(_endController, -10),
+                                  Text(
+                                    _endController.text,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontSize: 16.0),
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.replay_5),
-                                    onPressed: () =>
-                                        _adjustTime(_endController, -0.1),
-                                  ),
-                                  Container(
-                                    width: 80,
-                                    padding: EdgeInsets.symmetric(
-                                      vertical: 8.0,
-                                      horizontal: 12.0,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.grey,
-                                        width: 1.0,
-                                      ),
-                                      borderRadius: BorderRadius.circular(4.0),
-                                    ),
-                                    child: Text(
-                                      _endController.text,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 16.0),
-                                    ),
+                                    icon: Icon(Icons.flag),
+                                    onPressed: () => _setTime(_endController),
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.forward_5),
                                     onPressed: () =>
-                                        _adjustTime(_endController, 0.1),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.forward_10),
-                                    onPressed: () =>
-                                        _adjustTime(_endController, 10),
+                                        _adjustTime(_endController, 5),
                                   ),
                                 ],
                               ),
@@ -388,43 +354,18 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.replay_10),
-                                onPressed: () =>
-                                    _adjustTime(_startController, -10),
-                              ),
-                              IconButton(
                                 icon: Icon(Icons.replay_5),
                                 onPressed: () =>
-                                    _adjustTime(_startController, -0.1),
-                              ),
-                              Container(
-                                width: 80,
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 8.0,
-                                  horizontal: 12.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.grey,
-                                    width: 1.0,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4.0),
-                                ),
-                                child: Text(
-                                  _startController.text,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 16.0),
-                                ),
+                                    _adjustTime(_startController, -5),
                               ),
                               IconButton(
-                                icon: Icon(Icons.forward_5),
-                                onPressed: () =>
-                                    _adjustTime(_startController, 0.1),
+                                icon: Icon(Icons.crop),
+                                onPressed: () => _setTime(_startController),
                               ),
-                              IconButton(
-                                icon: Icon(Icons.forward_10),
-                                onPressed: () =>
-                                    _adjustTime(_startController, 10),
+                              Text(
+                                _startController.text,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 16.0),
                               ),
                             ],
                           ),
@@ -447,44 +388,18 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
                           // End Control
                           Row(
                             children: [
-                              IconButton(
-                                icon: Icon(Icons.replay_10),
-                                onPressed: () =>
-                                    _adjustTime(_endController, -10),
+                              Text(
+                                _endController.text,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 16.0),
                               ),
                               IconButton(
-                                icon: Icon(Icons.replay_5),
-                                onPressed: () =>
-                                    _adjustTime(_endController, -0.1),
-                              ),
-                              Container(
-                                width: 80,
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 8.0,
-                                  horizontal: 12.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Colors.grey,
-                                    width: 1.0,
-                                  ),
-                                  borderRadius: BorderRadius.circular(4.0),
-                                ),
-                                child: Text(
-                                  _endController.text,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 16.0),
-                                ),
+                                icon: Icon(Icons.flag),
+                                onPressed: () => _setTime(_endController),
                               ),
                               IconButton(
                                 icon: Icon(Icons.forward_5),
-                                onPressed: () =>
-                                    _adjustTime(_endController, 0.1),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.forward_10),
-                                onPressed: () =>
-                                    _adjustTime(_endController, 10),
+                                onPressed: () => _adjustTime(_endController, 5),
                               ),
                             ],
                           ),
