@@ -103,14 +103,17 @@ class _FlashcardTileState extends State<FlashcardTile> {
 
     if (interval == 0) {
       widget.flashcard.interval = 0;
+      widget.flashcard.nextDue = DateTime.now();
     } else {
       widget.flashcard.interval = widget.flashcard.interval + interval;
+      widget.flashcard.nextDue = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+      ).add(Duration(days: widget.flashcard.interval));
     }
 
     widget.flashcard.lastReviewed = DateTime.now();
-    widget.flashcard.nextDue = DateTime.now().add(
-      Duration(days: widget.flashcard.interval),
-    );
 
     setState(() {
       Provider.of<UserCardProvider>(context, listen: false)

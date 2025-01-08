@@ -8,11 +8,45 @@
 **/.packages
 
 # Platform-specific directories
-**/android/
+android/local.properties
+android/.gradle/
+android/app/build/
+
+# Ignore build artifacts
+linux/build/
+
+# Ignore generated configuration files
+linux/.dart_tool/
+linux/.flutter-plugins
+linux/.flutter-plugins-dependencies
+
+# Ignore temporary files
+linux/.idea/
+linux/.vscode/
+linux/*.iml
+
+# Ignore logs
+linux/flutter_*.log
+
+# Ignore CMake generated files
+linux/cmake-build-debug/
+linux/CMakeFiles/
+linux/CMakeCache.txt
+linux/Makefile
+linux/*.cmake
+linux/*.o
+linux/*.so
+linux/*.a
+linux/*.d
+linux/compile_commands.json
+
+# Ignore IDE-specific or editor-specific files
+*.swp
+*.swo
+
 **/ios/
 **/macos/
 **/windows/
-**/linux/
 **/web/
 
 # Coverage and debugging
