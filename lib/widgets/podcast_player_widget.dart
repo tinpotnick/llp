@@ -143,11 +143,23 @@ class _PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
               icon: const Icon(Icons.forward_10),
               onPressed: _fastForward,
             ),
-            if (_isDownloading)
-              CircularProgressIndicator(value: _downloadProgress),
-            IconButton(
-              icon: Icon(_isDownloaded ? Icons.download_done : Icons.download),
-              onPressed: _toggleDownload,
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(
+                      _isDownloaded ? Icons.download_done : Icons.download),
+                  onPressed: _toggleDownload,
+                ),
+                if (_isDownloading)
+                  SizedBox(
+                    height: 48, // Match IconButton size
+                    width: 48,
+                    child: CircularProgressIndicator(
+                      value: _downloadProgress,
+                    ),
+                  ),
+              ],
             ),
           ],
         ),
