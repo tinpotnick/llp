@@ -14,6 +14,10 @@ class PodcastProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  bool hasPodcast(String url) {
+    return _podcasts.containsKey(url);
+  }
+
   void removePodcast(Podcast podcast) {
     _podcasts.remove(podcast.url);
     _saveToStorage();

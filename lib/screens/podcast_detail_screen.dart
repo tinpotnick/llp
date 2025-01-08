@@ -17,11 +17,20 @@ class PodcastDetailScreen extends StatefulWidget {
 
 class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
   bool _isLoading = true;
+  bool _isSubscribed = false;
   Podcast? _podcast;
 
   @override
   void initState() {
     super.initState();
+    _fetchEpisodes();
+
+    _isSubscribed = Provider.of<PodcastProvider>(context, listen: false)
+        .hasPodcast(widget.podcast.url);
+
+    setState(() {});
+    if (_isSubscribed) return;
+
     _fetchEpisodes();
   }
 
@@ -83,20 +92,26 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                       style: TextStyle(fontSize: 16),
                     ),
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            _isSubscribed ? Colors.green : Colors.grey,
+                      ),
                       onPressed: () async {
-                        if (_podcast == null) {
-                          return;
+                        if (!_isSubscribed) {
+                          Provider.of<PodcastProvider>(context, listen: false)
+                              .addPodcast(widget.podcast.title);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text('Subscribed to ${widget.podcast.title}'),
+                            ),
+                          );
                         }
-
-                        Provider.of<PodcastProvider>(context, listen: false)
-                            .addPodcast(_podcast!);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  'Subscribed to ${widget.podcast.title}')),
-                        );
+                        setState(() {
+                          _isSubscribed = !_isSubscribed;
+                        });
                       },
-                      child: Text('Subscribe'),
+                      child: Text(_isSubscribed ? 'Subscribed' : 'Subscribe'),
                     ),
                     SizedBox(height: 16),
                     Text(
