@@ -3,6 +3,8 @@ import 'package:audioplayers/audioplayers.dart';
 import '../models/usercard.dart';
 import 'package:provider/provider.dart';
 import '../providers/usercard_provider.dart';
+import '../services/audio_player_manager.dart';
+import '../services/podcast_service.dart';
 import 'dart:math' as math;
 
 class FlashcardTile extends StatefulWidget {
@@ -24,15 +26,48 @@ class FlashcardTile extends StatefulWidget {
 }
 
 class _FlashcardTileState extends State<FlashcardTile> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
   Duration _currentPosition = Duration.zero;
-  bool _isRevealed =
-      false; // Controls whether the translation and buttons are shown
+  bool _isRevealed = false;
+  bool _isDownloaded = false;
+  bool _playRequested = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initAudio();
+  }
+
+  Future<void> _initAudio() async {
+    AudioPlayerManager().onPositionChanged.listen((position) async {
+      if (!mounted) return;
+      if (!_playRequested) return;
+
+      final flashcard =
+          widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
+
+      if (flashcard == null) return;
+
+      if (position >= flashcard.end) {
+        await AudioPlayerManager().seek(flashcard.start);
+        _currentPosition = flashcard.start;
+      } else {
+        _currentPosition = position;
+      }
+      setState(() {});
+    });
+
+    final flashcard =
+        widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
+    if (null == flashcard) return;
+
+    _isDownloaded = await PodcastService.hasDownload(flashcard.audioUrl);
+  }
 
   Future<void> _playPause() async {
     if (_isPlaying) {
-      await _audioPlayer.pause();
+      await AudioPlayerManager().pause();
+      _isPlaying = false;
     } else {
       final flashcard =
           widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
@@ -41,38 +76,29 @@ class _FlashcardTileState extends State<FlashcardTile> {
         return;
       }
 
-      await _audioPlayer.play(UrlSource(flashcard.audioUrl));
-      _audioPlayer.seek(flashcard.start);
+      if (_isDownloaded) {
+        final filePath =
+            await PodcastService.getLocalPodcastFilePath(flashcard.audioUrl);
+        await AudioPlayerManager().play(DeviceFileSource(filePath));
+      } else {
+        await AudioPlayerManager().play(UrlSource(flashcard.audioUrl));
+      }
+
+      AudioPlayerManager().seek(flashcard.start);
+
+      _playRequested = true;
+      _isPlaying = true;
     }
 
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
-
-    _audioPlayer.onPositionChanged.listen((position) {
-      if (!mounted) return;
-      final flashcard =
-          widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
-
-      if (flashcard == null) {
-        return;
-      }
-
-      if (position >= flashcard.end) {
-        _audioPlayer.pause();
-        setState(() {
-          _isPlaying = false;
-          _currentPosition = flashcard.start;
-        });
-      } else {
-        setState(() {
-          _currentPosition = position;
-        });
-      }
-    });
+    setState(() {});
   }
 
-  _gradeCard(int interval) {
+  Future<void> _gradeCard(int interval) async {
+    if (_isPlaying) {
+      await AudioPlayerManager().pause();
+      _isPlaying = false;
+    }
+
     widget.flashcard.attempts += 1;
 
     if (interval == 0) {
@@ -94,7 +120,6 @@ class _FlashcardTileState extends State<FlashcardTile> {
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
     super.dispose();
   }
 
