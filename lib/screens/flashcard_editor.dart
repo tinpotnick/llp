@@ -119,7 +119,10 @@ class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
 
   void _adjustTime(TextEditingController controller, double adjustment) {
     final current = double.tryParse(controller.text) ?? 0.0;
-    controller.text = (current + adjustment).toStringAsFixed(2);
+    double adjusted = current + adjustment;
+    if (adjusted < 0) adjusted = 0;
+
+    controller.text = adjusted.toStringAsFixed(2);
     setState(() {});
   }
 
