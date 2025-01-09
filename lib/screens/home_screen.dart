@@ -4,6 +4,8 @@ import 'subscribed_navigator.dart';
 import 'flashcard_deck.dart';
 import 'settings.dart';
 
+import 'package:llp/widgets/podcast_player_widget.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -13,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  bool _isPlaying = true;
 
   // List of screens corresponding to the BottomNavigationBar items
   final List<Widget> _screens = [
@@ -32,7 +35,25 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex], // Display the selected screen
+      body: Stack(
+        children: [
+          // The selected screen content
+          _screens[_selectedIndex],
+
+          // PodcastPlayerWidget placed above the BottomNavigationBar
+          if (true) // Replace 'true' with your condition for showing the player
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: kBottomNavigationBarHeight, // Position above the BottomNavigationBar
+              child: PodcastPlayerWidget(
+                audioUrl: "",
+                onPositionChanged: (position) => {},
+              ),
+            ),
+        ],
+      ),
+
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white, // Background color of the bar
         selectedItemColor: Colors.blue, // Color of the selected icon
