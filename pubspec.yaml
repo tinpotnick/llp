@@ -34,6 +34,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  flutter_launcher_icons: ^0.14.2
   audioplayers: ^6.1.0
   provider: ^6.0.5
   sqflite: ^2.0.0+4
@@ -105,3 +106,12 @@ flutter:
         - asset: fonts/static/NotoSans-Regular.ttf
         - asset: fonts/static/NotoSans-Bold.ttf
           weight: 700
+
+# to generate all icons from this package use `flutter pub run flutter_launcher_icons`
+flutter_launcher_icons:
+  android: true
+  ios: false # TODO
+  remove_alpha_ios: true
+  image_path: "assets/logo.png"
+  adaptive_icon_background: "#FFFFFF" # Use a solid color or a background image
+  adaptive_icon_foreground: "assets/logo.png"
