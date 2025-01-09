@@ -1,4 +1,4 @@
-package com.example.temp_project
+package uk.co.tinpot.llp
 
 import io.flutter.embedding.android.FlutterActivity
 
