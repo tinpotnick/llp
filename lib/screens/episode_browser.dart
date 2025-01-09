@@ -9,13 +9,13 @@ import 'package:html/parser.dart' as html;
 class EpisodeBrowserScreen extends StatefulWidget {
   final String feedUrl;
 
-  const EpisodeBrowserScreen({required this.feedUrl});
+  const EpisodeBrowserScreen({super.key, required this.feedUrl});
 
   @override
-  _EpisodeBrowserScreenState createState() => _EpisodeBrowserScreenState();
+  EpisodeBrowserScreenState createState() => EpisodeBrowserScreenState();
 }
 
-class _EpisodeBrowserScreenState extends State<EpisodeBrowserScreen> {
+class EpisodeBrowserScreenState extends State<EpisodeBrowserScreen> {
   List<Map<String, String>> _episodes = [];
   bool _isLoading = true;
 

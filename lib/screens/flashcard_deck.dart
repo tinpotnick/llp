@@ -7,11 +7,13 @@ import '../widgets/flashcard_view.dart';
 import 'flashcard_editor.dart';
 
 class FlashcardDeckScreen extends StatefulWidget {
+  const FlashcardDeckScreen({super.key});
+
   @override
-  _FlashcardDeckScreenState createState() => _FlashcardDeckScreenState();
+  FlashcardDeckScreenState createState() => FlashcardDeckScreenState();
 }
 
-class _FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
+class FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'flashcard_editor.dart';
-import '../models/flashcard.dart';
 import '../widgets/podcast_player_widget.dart';
 import '../widgets/flashcard_list_widget.dart';
 
@@ -8,7 +6,7 @@ class PodcastPlayerScreen extends StatelessWidget {
   final String audioUrl;
   final String episodeTitle;
 
-  const PodcastPlayerScreen({
+  const PodcastPlayerScreen({super.key, 
     required this.audioUrl,
     required this.episodeTitle,
   });

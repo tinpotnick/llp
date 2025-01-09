@@ -4,11 +4,13 @@ import 'podcast_detail_screen.dart';
 import '../services/podcast_service.dart';
 
 class PodcastBrowserScreen extends StatefulWidget {
+  const PodcastBrowserScreen({super.key});
+
   @override
-  _PodcastBrowserScreenState createState() => _PodcastBrowserScreenState();
+  PodcastBrowserScreenState createState() => PodcastBrowserScreenState();
 }
 
-class _PodcastBrowserScreenState extends State<PodcastBrowserScreen> {
+class PodcastBrowserScreenState extends State<PodcastBrowserScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<dynamic> _podcasts = [];
   bool _isLoading = false;

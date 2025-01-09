@@ -9,13 +9,13 @@ import '../services/podcast_service.dart';
 class PodcastDetailScreen extends StatefulWidget {
   final dynamic podcast;
 
-  const PodcastDetailScreen({required this.podcast});
+  const PodcastDetailScreen({super.key, required this.podcast});
 
   @override
-  _PodcastDetailScreenState createState() => _PodcastDetailScreenState();
+  PodcastDetailScreenState createState() => PodcastDetailScreenState();
 }
 
-class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
+class PodcastDetailScreenState extends State<PodcastDetailScreen> {
   bool _isLoading = true;
   bool _isSubscribed = false;
   Podcast? _podcast;
@@ -99,7 +99,7 @@ class _PodcastDetailScreenState extends State<PodcastDetailScreen> {
                       onPressed: () async {
                         if (!_isSubscribed) {
                           Provider.of<PodcastProvider>(context, listen: false)
-                              .addPodcast(widget.podcast.title);
+                              .addPodcast(widget.podcast);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content:

@@ -11,15 +11,15 @@ import '../services/audio_player_manager.dart';
 class FlashcardEditorScreen extends StatefulWidget {
   final Flashcard flashcard;
 
-  const FlashcardEditorScreen({
+  const FlashcardEditorScreen({super.key, 
     required this.flashcard,
   });
 
   @override
-  _FlashcardEditorScreenState createState() => _FlashcardEditorScreenState();
+  FlashcardEditorScreenState createState() => FlashcardEditorScreenState();
 }
 
-class _FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
+class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
   late TextEditingController _translationController;
   late TextEditingController _startController;
   late TextEditingController _endController;

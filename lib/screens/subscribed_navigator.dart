@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
-import 'dart:convert';
 import 'package:provider/provider.dart';
 import '../providers/podcast_provider.dart';
 import '../models/podcast.dart';
 import 'podcast_detail_screen.dart';
 
 class SubscribedNavigator extends StatefulWidget {
+  const SubscribedNavigator({super.key});
+
   @override
-  _SubscribedNavigatorState createState() => _SubscribedNavigatorState();
+  SubscribedNavigatorState createState() => SubscribedNavigatorState();
 }
 
-class _SubscribedNavigatorState extends State<SubscribedNavigator> {
+class SubscribedNavigatorState extends State<SubscribedNavigator> {
   List<Podcast> _subscriptions = [];
-  bool _isLoading = true;
 
   Future<void> _loadSubscriptions() async {
     Map<String, Podcast> mapofsubs =
@@ -21,9 +21,7 @@ class _SubscribedNavigatorState extends State<SubscribedNavigator> {
 
     _subscriptions = mapofsubs.values.toList();
 
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() {});
   }
 
   Future<void> _removeSubscription(Podcast? podcast) async {}
