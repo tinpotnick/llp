@@ -10,16 +10,16 @@ class PodcastPlayerWidget extends StatefulWidget {
   final String audioUrl;
   final ValueChanged<Duration> onPositionChanged;
 
-  const PodcastPlayerWidget({
+  const PodcastPlayerWidget({super.key, 
     required this.audioUrl,
     required this.onPositionChanged,
   });
 
   @override
-  _PodcastPlayerWidgetState createState() => _PodcastPlayerWidgetState();
+  PodcastPlayerWidgetState createState() => PodcastPlayerWidgetState();
 }
 
-class _PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
+class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
   bool _isPlaying = false;
   bool _isDownloaded = false;
   bool _isDownloading = false;

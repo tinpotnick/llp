@@ -14,12 +14,12 @@ class FlashcardTile extends StatefulWidget {
   final VoidCallback onEdit;
 
   const FlashcardTile({
-    Key? key,
+    super.key,
     required this.userCardProvider,
     required this.flashcard,
     required this.onDelete,
     required this.onEdit,
-  }) : super(key: key);
+  });
 
   @override
   State<FlashcardTile> createState() => _FlashcardTileState();

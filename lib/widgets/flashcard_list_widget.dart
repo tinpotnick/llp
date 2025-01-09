@@ -10,6 +10,7 @@ class FlashcardListWidget extends StatelessWidget {
   final Duration Function() getPosition;
 
   const FlashcardListWidget({
+    super.key, 
     required this.audioUrl,
     required this.getPosition,
   });
@@ -25,7 +26,6 @@ class FlashcardListWidget extends StatelessWidget {
 
   Future<void> _addFlashcard(BuildContext context) async {
     Duration currentPosition = getPosition();
-    print(currentPosition);
     Navigator.push(
       context,
       MaterialPageRoute(
