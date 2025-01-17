@@ -35,11 +35,39 @@ class SliderWithCustomTrackState extends State<SliderWithCustomTrack> {
     super.initState();
 
     sectionStart = widget.min ?? 0;
-    sectionEnd = widget.max ?? 0;
-    totalDuration = widget.duration ?? 0;
+    sectionEnd = widget.max ?? 100;
+    totalDuration = widget.duration ?? 100;
+    pos = widget.value ?? sectionStart;
 
-    pos = widget.value ?? 0;
+    // Ensure valid range
+    if (sectionStart >= sectionEnd) {
+      sectionEnd = sectionStart + 1;
+    }
+    if(sectionEnd >= totalDuration){
+        totalDuration = sectionEnd;
+    }
+    if( pos >= sectionEnd ) {
+      pos = sectionStart;
+    }
   }
+
+  @override
+  void didUpdateWidget(covariant SliderWithCustomTrack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Update state when widget properties change
+    if (widget.min != oldWidget.min || widget.max != oldWidget.max) {
+      sectionStart = widget.min ?? 0;
+      sectionEnd = widget.max ?? 100;
+    }
+    if (widget.duration != oldWidget.duration) {
+      totalDuration = widget.duration ?? 100;
+    }
+    if (widget.value != oldWidget.value) {
+      pos = widget.value ?? sectionStart;
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -56,17 +84,18 @@ class SliderWithCustomTrackState extends State<SliderWithCustomTrack> {
           ),
           child: Slider(
             value: pos,
-            onChanged: (newvalue) {
+            onChanged: (newValue) {
               setState(() {
-                pos = newvalue;
+                // Clamp the value within min and max
+                pos = newValue.clamp(sectionStart, sectionEnd);
               });
 
-              if( widget.onChanged != null ) {
-                widget.onChanged!(newvalue);
+              if (widget.onChanged != null) {
+                widget.onChanged!(pos);
               }
             },
-            min: 0,
-            max: totalDuration,
+            min: sectionStart,
+            max: sectionEnd,
             activeColor: Colors.green,
             inactiveColor: Colors.grey,
           ),
@@ -128,39 +157,30 @@ class CustomSectionSliderTrackShape extends SliderTrackShape {
     final double trackWidth = trackRect.width;
     final double trackLeft = trackRect.left;
 
-    // Calculate the start and end points for the purple section
+    // Avoid division-by-zero by ensuring max > min
+    if (max <= min) return;
+
+    // Normalize sectionStart and sectionEnd to within the track
     final double sectionStartX = trackLeft + ((sectionStart - min) / (max - min)) * trackWidth;
     final double sectionEndX = trackLeft + ((sectionEnd - min) / (max - min)) * trackWidth;
 
+    // Paint the track
     final Paint activePaint = Paint()..color = sliderTheme.activeTrackColor!;
     final Paint inactivePaint = Paint()..color = sliderTheme.inactiveTrackColor!;
-    final Paint sectionLeftPaint = Paint()..color = Colors.purpleAccent; // Purple if left of thumb
-    final Paint sectionRightPaint = Paint()..color = Colors.purple; // Purple if right of thumb
+    final Paint purplePaint = Paint()..color = Colors.purpleAccent;
 
-    // Draw inactive track after the thumb
+    // Draw inactive track after thumb
     final Rect inactiveAfterRect = Rect.fromLTWH(thumbCenter.dx, trackRect.top, trackLeft + trackWidth - thumbCenter.dx, trackRect.height);
     context.canvas.drawRect(inactiveAfterRect, inactivePaint);
 
-    // Draw active track (everything left of the thumb)
+    // Draw active track (everything left of thumb)
     final Rect activeTrackRect = Rect.fromLTWH(trackLeft, trackRect.top, thumbCenter.dx - trackLeft, trackRect.height);
     context.canvas.drawRect(activeTrackRect, activePaint);
 
     // Draw the purple section
-    if (thumbCenter.dx <= sectionStartX) {
-      // Thumb is entirely left of the purple section
+    if (sectionEndX > sectionStartX) {
       final Rect purpleRect = Rect.fromLTWH(sectionStartX, trackRect.top, sectionEndX - sectionStartX, trackRect.height);
-      context.canvas.drawRect(purpleRect, sectionRightPaint);
-    } else if (thumbCenter.dx >= sectionEndX) {
-      // Thumb is entirely right of the purple section
-      final Rect purpleRect = Rect.fromLTWH(sectionStartX, trackRect.top, sectionEndX - sectionStartX, trackRect.height);
-      context.canvas.drawRect(purpleRect, sectionLeftPaint);
-    } else {
-      // Thumb is inside the purple section, split into two parts
-      final Rect purpleLeftRect = Rect.fromLTWH(sectionStartX, trackRect.top, thumbCenter.dx - sectionStartX, trackRect.height);
-      final Rect purpleRightRect = Rect.fromLTWH(thumbCenter.dx, trackRect.top, sectionEndX - thumbCenter.dx, trackRect.height);
-
-      context.canvas.drawRect(purpleLeftRect, sectionLeftPaint);
-      context.canvas.drawRect(purpleRightRect, sectionRightPaint);
+      context.canvas.drawRect(purpleRect, purplePaint);
     }
   }
 }

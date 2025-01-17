@@ -1,11 +1,11 @@
+
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
-import '../models/usercard.dart';
+import 'package:llp/models/usercard.dart';
+import 'package:llp/models/podcast.dart';
 import 'package:provider/provider.dart';
-import '../providers/usercard_provider.dart';
-import '../services/audio_player_manager.dart';
-import '../services/podcast_service.dart';
-import 'dart:math' as math;
+import 'package:llp/providers/usercard_provider.dart';
+import 'package:llp/providers/podcast_provider.dart';
+import 'package:llp/services/audio_player_manager.dart';
 
 class FlashcardTile extends StatefulWidget {
   final UserFlashcardStatus flashcard;
@@ -27,41 +27,12 @@ class FlashcardTile extends StatefulWidget {
 
 class _FlashcardTileState extends State<FlashcardTile> {
   bool _isPlaying = false;
-  Duration _currentPosition = Duration.zero;
   bool _isRevealed = false;
-  bool _isDownloaded = false;
-  bool _playRequested = false;
 
   @override
   void initState() {
     super.initState();
-    _initAudio();
-  }
 
-  Future<void> _initAudio() async {
-    AudioPlayerManager().onPositionChanged.listen((position) async {
-      if (!mounted) return;
-      if (!_playRequested) return;
-
-      final flashcard =
-          widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
-
-      if (flashcard == null) return;
-
-      if (position >= flashcard.end) {
-        await AudioPlayerManager().seek(flashcard.start);
-        _currentPosition = flashcard.start;
-      } else {
-        _currentPosition = position;
-      }
-      setState(() {});
-    });
-
-    final flashcard =
-        widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
-    if (null == flashcard) return;
-
-    _isDownloaded = await PodcastService.hasDownload(flashcard.audioUrl);
   }
 
   Future<void> _playPause() async {
@@ -72,21 +43,17 @@ class _FlashcardTileState extends State<FlashcardTile> {
       final flashcard =
           widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
 
-      if (flashcard == null) {
-        return;
-      }
+      if (flashcard == null) return;
 
-      if (_isDownloaded) {
-        final filePath =
-            await PodcastService.getLocalPodcastFilePath(flashcard.audioUrl);
-        await AudioPlayerManager().play(DeviceFileSource(filePath));
-      } else {
-        await AudioPlayerManager().play(UrlSource(flashcard.audioUrl));
-      }
+      final podcast = Provider.of<PodcastProvider>(context, listen: false)
+                              .getPodcast(flashcard.podcastUrl);
+      final episode = Provider.of<PodcastProvider>(context, listen: false)
+                              .getPodcastEpisode(podcast, flashcard.episodeUrl);
 
-      AudioPlayerManager().seek(flashcard.start);
+      if(episode == PodcastEpisode.empty()) return;
 
-      _playRequested = true;
+      await AudioPlayerManager().play(episode, flashcard);
+
       _isPlaying = true;
     }
 
@@ -135,17 +102,6 @@ class _FlashcardTileState extends State<FlashcardTile> {
       return Card();
     }
 
-    final snippetDuration = flashcard.end - flashcard.start;
-
-    // Ensure slider value is within range
-    final sliderValue = math.max(
-      0,
-      math.min(
-        (_currentPosition - flashcard.start).inMilliseconds.toDouble(),
-        snippetDuration.inMilliseconds.toDouble(),
-      ),
-    );
-
     return Card(
       margin: const EdgeInsets.all(8.0),
       child: Padding(
@@ -153,22 +109,10 @@ class _FlashcardTileState extends State<FlashcardTile> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              flashcard.text,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            SizedBox(height: 8),
-
             // Playback controls
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Slider(
-                  value: sliderValue.toDouble(),
-                  min: 0,
-                  max: snippetDuration.inMilliseconds.toDouble(),
-                  onChanged: (_) {}, // Slider is read-only for now
-                ),
                 Row(
                   children: [
                     IconButton(

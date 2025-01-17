@@ -1,17 +1,18 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
 
 import '../services/audio_player_manager.dart';
 import '../services/podcast_service.dart';
+import '../models/podcast.dart';
+
+import '../widgets/subselectslider.dart';
 
 class PodcastPlayerWidget extends StatefulWidget {
-  final String audioUrl;
+  final PodcastEpisode podcastEpisode;
   final ValueChanged<Duration> onPositionChanged;
 
   const PodcastPlayerWidget({super.key, 
-    required this.audioUrl,
+    required this.podcastEpisode,
     required this.onPositionChanged,
   });
 
@@ -20,7 +21,6 @@ class PodcastPlayerWidget extends StatefulWidget {
 }
 
 class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
-  bool _isPlaying = false;
   bool _isDownloaded = false;
   bool _isDownloading = false;
   double _downloadProgress = 0.0;
@@ -51,26 +51,18 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
 
     AudioPlayerManager().onPlayerStateChanged.listen((state) {
       if (!mounted) return;
-      setState(() {
-        _isPlaying = state == PlayerState.playing;
-      });
+      setState(() {});
     });
 
-    _isDownloaded = await PodcastService.hasDownload(widget.audioUrl);
+    _isDownloaded = await PodcastService.hasDownload(widget.podcastEpisode.audioUrl);
     setState(() {});
   }
 
   Future<void> _playPause() async {
-    if (_isPlaying) {
+    if (AudioPlayerManager().isPlaying()) {
       await AudioPlayerManager().pause();
     } else {
-      if (_isDownloaded) {
-        final filePath =
-            await PodcastService.getLocalPodcastFilePath(widget.audioUrl);
-        await AudioPlayerManager().play(DeviceFileSource(filePath));
-      } else {
-        await AudioPlayerManager().play(UrlSource(widget.audioUrl));
-      }
+      await AudioPlayerManager().play(widget.podcastEpisode);
     }
   }
 
@@ -88,13 +80,13 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
     if (!mounted) return;
     if (_isDownloaded) {
       final filePath =
-          await PodcastService.getLocalPodcastFilePath(widget.audioUrl);
+          await PodcastService.getLocalPodcastFilePath(widget.podcastEpisode.audioUrl);
       final file = File(filePath);
       if (await file.exists()) await file.delete();
       setState(() => _isDownloaded = false);
     } else {
       setState(() => _isDownloading = true);
-      await PodcastService.downloadPodcast(widget.audioUrl,
+      await PodcastService.downloadPodcast(widget.podcastEpisode.audioUrl,
           onProgress: (progress) {
         setState(() => _downloadProgress = progress);
       });
@@ -107,7 +99,6 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
 
   @override
   void dispose() {
-    AudioPlayerManager().pause();
     super.dispose();
   }
 
@@ -118,54 +109,127 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
     }
 
     return Column(
+      mainAxisSize: MainAxisSize.min, // Ensures the column takes only the size of its children
       children: [
-        Slider(
-          value: _currentPosition.inMilliseconds.toDouble(),
-          min: 0,
-          max: _totalDuration.inMilliseconds.toDouble(),
-          onChanged: (value) {
-            final newPosition = Duration(milliseconds: value.toInt());
-            AudioPlayerManager().seek(newPosition);
-          },
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.replay_10),
-              onPressed: _rewind,
-            ),
-            IconButton(
-              icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-              onPressed: _playPause,
-            ),
-            IconButton(
-              icon: const Icon(Icons.forward_10),
-              onPressed: _fastForward,
-            ),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(
-                      _isDownloaded ? Icons.download_done : Icons.download),
-                  onPressed: _toggleDownload,
+        Flexible(
+          // Constrains the Center widget
+          child: Center(
+            child: Container(
+              decoration: BoxDecoration(
+                // color: Colors.white, // Background color
+                border: Border.all(
+                  color: Colors.black, // Border color
+                  width: 1.0, // Border width
                 ),
-                if (_isDownloading)
-                  SizedBox(
-                    height: 48, // Match IconButton size
-                    width: 48,
-                    child: CircularProgressIndicator(
-                      value: _downloadProgress,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: SizedBox(
+                height: 90,
+                child: Row( // Main Row containing the image and all controls
+                  crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch image to fill height
+                  children: [
+                    // Add Image on the Left Spanning All Rows
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(5),
+                        bottomLeft: Radius.circular(5),
+                      ), // Optional rounded corners
+                      child: Image.network(
+                        widget.podcastEpisode.imageUrl,
+                        width: 90, // Fixed width for the image
+                        fit: BoxFit.cover, // Ensure the image fills its container
+                      ),
                     ),
-                  ),
-              ],
+                    Expanded(
+                      // Remaining content
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: MediaQuery.of(context).size.width * 0.85, // Adjust for image width
+                                  maxHeight: 30,
+                                ),
+                                child: SliderWithCustomTrack(
+                                  value: _currentPosition.inMilliseconds.toDouble(),
+                                  min: 0,
+                                  max: _totalDuration.inMilliseconds.toDouble(),
+                                  duration: _totalDuration.inMilliseconds.toDouble(),
+                                  onChanged: (value) {
+                                    final newPosition = Duration(milliseconds: value.toInt());
+                                    AudioPlayerManager().seek(newPosition);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.replay_10),
+                                onPressed: _rewind,
+                              ),
+                              IconButton(
+                                icon: Icon(AudioPlayerManager().isPlaying()
+                                    ? Icons.pause
+                                    : Icons.play_arrow),
+                                onPressed: _playPause,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.forward_10),
+                                onPressed: _fastForward,
+                              ),
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      _isDownloaded ? Icons.download_done : Icons.download,
+                                    ),
+                                    onPressed: _toggleDownload,
+                                  ),
+                                  if (_isDownloading)
+                                    SizedBox(
+                                      height: 48, // Match IconButton size
+                                      width: 48,
+                                      child: CircularProgressIndicator(
+                                        value: _downloadProgress,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(Icons.crop, size: 10),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(Icons.repeat),
+                                  ),
+                                ],
+                              ),
+                              IconButton(onPressed: () {}, icon: Icon(Icons.repeat)),
+                            ],
+                          ),
+                          Text(
+                            '${_currentPosition.inMinutes}:${(_currentPosition.inSeconds % 60).toString().padLeft(2, '0')} / '
+                            '${_totalDuration.inMinutes}:${(_totalDuration.inSeconds % 60).toString().padLeft(2, '0')}',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
-        ),
-        Text(
-          '${_currentPosition.inMinutes}:${(_currentPosition.inSeconds % 60).toString().padLeft(2, '0')} / '
-          '${_totalDuration.inMinutes}:${(_totalDuration.inSeconds % 60).toString().padLeft(2, '0')}',
+          ),
         ),
       ],
     );

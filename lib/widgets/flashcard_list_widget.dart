@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/flashcard.dart';
-import '../providers/flashcard_provider.dart';
-import '../screens/flashcard_editor.dart';
+import 'package:llp/models/flashcard.dart';
+import 'package:llp/models/podcast.dart';
+import 'package:llp/providers/flashcard_provider.dart';
+import 'package:llp/screens/flashcard_editor.dart';
 
 class FlashcardListWidget extends StatelessWidget {
-  final String audioUrl;
+  final PodcastEpisode episode;
   final Duration Function() getPosition;
 
   const FlashcardListWidget({
     super.key, 
-    required this.audioUrl,
+    required this.episode,
     required this.getPosition,
   });
 
@@ -19,7 +20,7 @@ class FlashcardListWidget extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FlashcardEditorScreen(flashcard: flashcard),
+        builder: (context) => FlashcardEditorScreen(flashcard: flashcard, episode: episode),
       ),
     );
   }
@@ -31,12 +32,13 @@ class FlashcardListWidget extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => FlashcardEditorScreen(
           flashcard: Flashcard(
-            text: '',
             translation: '',
-            audioUrl: audioUrl,
+            episodeUrl: episode.audioUrl,
+            podcastUrl: '',
             start: currentPosition - const Duration(seconds: 5),
             end: currentPosition,
           ),
+          episode: episode,
         ),
       ),
     );
@@ -56,7 +58,7 @@ class FlashcardListWidget extends StatelessWidget {
           child: Consumer<FlashcardProvider>(
             builder: (context, flashcardProvider, child) {
               final flashcards =
-                  flashcardProvider.getFlashcardsForEpisode(audioUrl);
+                  flashcardProvider.getFlashcardsForEpisode(episode);
               if (flashcards.isEmpty) {
                 return const Center(
                   child: Text("No flashcards added yet."),
@@ -67,7 +69,7 @@ class FlashcardListWidget extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final flashcard = flashcards[index];
                   return ListTile(
-                    title: Text(flashcard.text),
+                    title: Text(""),
                     subtitle: Text(flashcard.translation),
                     onTap: () => _editFlashcard(context, flashcard),
                     trailing: Text(

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/usercard_provider.dart';
-
-import '../widgets/flashcard_view.dart';
-
-import 'flashcard_editor.dart';
+import 'package:llp/providers/usercard_provider.dart';
+import 'package:llp/widgets/flashcard_view.dart';
 
 class FlashcardDeckScreen extends StatefulWidget {
   const FlashcardDeckScreen({super.key});
@@ -32,6 +29,7 @@ class FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
             itemCount: flashcardList.length,
             itemBuilder: (context, index) {
               final flashcard = flashcardList[index];
+
               return FlashcardTile(
                 key: ValueKey(flashcard.uuid),
                 userCardProvider: usercardProvider,
@@ -52,14 +50,6 @@ class FlashcardDeckScreenState extends State<FlashcardDeckScreen> {
                     return;
                   }
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FlashcardEditorScreen(
-                        flashcard: flshcard,
-                      ),
-                    ),
-                  );
                 },
               );
             },

@@ -14,6 +14,29 @@ class PodcastProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  PodcastEpisode getPodcastEpisode(Podcast podcast, String url) {
+    if( podcast.isEmpty() ) {
+      return PodcastEpisode.empty();
+    }
+
+    for (int i = 0; i < podcast.episodes.length; i++) {
+      if( url == podcast.episodes[i].audioUrl ) {
+        return podcast.episodes[i];
+      }
+    }
+
+    return PodcastEpisode.empty();
+  }
+
+  Podcast getPodcast(String url) {
+    if( _podcasts.containsKey(url) ) {
+      final Podcast pd = _podcasts[url]!;
+      return pd;
+    }
+
+    return Podcast.empty();
+  }
+
   bool hasPodcast(String url) {
     return _podcasts.containsKey(url);
   }

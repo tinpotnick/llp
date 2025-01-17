@@ -1,10 +1,17 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 
+import 'package:llp/models/flashcard.dart';
+import 'package:llp/models/podcast.dart';
+
+import 'package:llp/services/podcast_service.dart';
+
 class AudioPlayerManager {
   // Singleton instance
   static final AudioPlayerManager _instance = AudioPlayerManager._internal();
   factory AudioPlayerManager() => _instance;
+
+  PodcastEpisode? _podcastepisode;
 
   // AudioPlayer instance
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -32,7 +39,9 @@ class AudioPlayerManager {
     });
 
     _audioPlayer.onDurationChanged.listen((duration) {
-      _durationController.add(duration);
+      if (duration.inMilliseconds > 0) {
+        _durationController.add(duration);
+      }
     });
 
     _audioPlayer.onPlayerStateChanged.listen((state) {
@@ -40,12 +49,41 @@ class AudioPlayerManager {
     });
 
     _audioPlayer.onPlayerComplete.listen((event) {
-      _completionController.add(null); // Broadcast completion event
+      _completionController.add(null);
     });
   }
 
-  Future<void> play(source) async {
-    await _audioPlayer.play(source);
+  bool isPlaying() {
+    return _audioPlayer.state == PlayerState.playing;
+  }
+
+  bool hasEpisode() {
+    return _podcastepisode != null;
+  }
+
+  PodcastEpisode getEpisode() {
+    return _podcastepisode ?? PodcastEpisode.empty();
+  }
+
+  Future<void> play(PodcastEpisode podcastepisode, [ Flashcard? card ]) async {
+
+    if( podcastepisode.isEmpty() ) return;
+
+    _podcastepisode = podcastepisode;
+    final isDownloaded = await PodcastService.hasDownload(podcastepisode.audioUrl);
+
+    if (isDownloaded) {
+      final filePath =
+          await PodcastService.getLocalPodcastFilePath(podcastepisode.audioUrl);
+      await  _audioPlayer.play(DeviceFileSource(filePath));
+    } else {
+      await  _audioPlayer.play(UrlSource(podcastepisode.audioUrl));
+    }
+    
+    if( card != null ) {
+      await _audioPlayer.seek(card.start);
+      // TODO and do end
+    }
   }
 
   Future<void> pause() async {

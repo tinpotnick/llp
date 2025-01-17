@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import '../widgets/podcast_player_widget.dart';
-import '../widgets/flashcard_list_widget.dart';
+
+import 'package:llp/widgets/podcast_player_widget.dart';
+import 'package:llp/widgets/flashcard_list_widget.dart';
+
+import 'package:llp/models/podcast.dart';
 
 class PodcastPlayerScreen extends StatelessWidget {
-  final String audioUrl;
-  final String episodeTitle;
+  final PodcastEpisode podcastEpisode;
 
   const PodcastPlayerScreen({super.key, 
-    required this.audioUrl,
-    required this.episodeTitle,
+    required this.podcastEpisode
   });
 
   @override
@@ -17,21 +18,21 @@ class PodcastPlayerScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(episodeTitle),
+        title: Text(podcastEpisode.title),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             PodcastPlayerWidget(
-                audioUrl: audioUrl,
+                podcastEpisode: podcastEpisode,
                 onPositionChanged: (position) {
                   currentPosition = position;
                 }),
             const SizedBox(height: 20),
             Expanded(
               child: FlashcardListWidget(
-                audioUrl: audioUrl,
+                episode: podcastEpisode,
                 getPosition: () => currentPosition,
               ),
             ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:llp/models/podcast.dart';
 import 'package:provider/provider.dart';
 import '../models/flashcard.dart';
 import '../models/usercard.dart';
@@ -9,9 +9,11 @@ import '../providers/usercard_provider.dart';
 import '../services/audio_player_manager.dart';
 
 class FlashcardEditorScreen extends StatefulWidget {
+  final PodcastEpisode episode;
   final Flashcard flashcard;
 
   const FlashcardEditorScreen({super.key, 
+    required this.episode,
     required this.flashcard,
   });
 
@@ -68,7 +70,7 @@ class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
         });
       });
 
-      await AudioPlayerManager().play(UrlSource(widget.flashcard.audioUrl));
+      await AudioPlayerManager().play(widget.episode, widget.flashcard);
 
       _currentPosition = _getDurationFromController(_startController);
       AudioPlayerManager().seek(_currentPosition);
@@ -78,6 +80,7 @@ class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
         });
       }
     } catch (e) {
+      if(!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error initializing audio: $e')),
       );
@@ -107,8 +110,7 @@ class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
         _isPlaying = false;
       });
     } else {
-      await AudioPlayerManager().play(UrlSource(widget.flashcard.audioUrl));
-      await AudioPlayerManager().seek(_currentPosition);
+      await AudioPlayerManager().play(widget.episode, widget.flashcard);
       if (mounted) {
         setState(() {
           _isPlaying = true;
@@ -151,18 +153,18 @@ class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
     if (flashcardprovider.hasCard(widget.flashcard.uuid)) {
       flashcardprovider.updateCard(Flashcard(
         uuid: widget.flashcard.uuid,
-        text: widget.flashcard.text,
         translation: _translationController.text,
-        audioUrl: widget.flashcard.audioUrl,
+        podcastUrl: widget.flashcard.podcastUrl,
+        episodeUrl: widget.flashcard.episodeUrl,
         start: newStart,
         end: newEnd,
       ));
     } else {
       final newcard = Flashcard(
         uuid: widget.flashcard.uuid,
-        text: widget.flashcard.text,
         translation: _translationController.text,
-        audioUrl: widget.flashcard.audioUrl,
+        podcastUrl: widget.flashcard.podcastUrl,
+        episodeUrl: widget.flashcard.episodeUrl,
         start: newStart,
         end: newEnd,
       );

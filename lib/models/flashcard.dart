@@ -6,17 +6,19 @@ import 'dart:math';
 
 class Flashcard {
   final String uuid;
-  final String text;
   final String translation;
-  final String audioUrl;
+  /* the rss feed */
+  final String podcastUrl;
+  /* the content - ussually mp3 */
+  final String episodeUrl;
   final Duration start;
   final Duration end;
 
   Flashcard({
     String? uuid,
-    required this.text,
     required this.translation,
-    required this.audioUrl,
+    required this.podcastUrl,
+    required this.episodeUrl,
     required start,
     required end,
   })  : uuid = uuid ?? Uuid().v4(),
@@ -26,9 +28,9 @@ class Flashcard {
   Map<String, dynamic> toJson() {
     return {
       'uuid': uuid,
-      'text': text,
       'translation': translation,
-      'audioUrl': audioUrl,
+      'podcastUrl': podcastUrl,
+      'episodeUrl': episodeUrl,
       'start': start.inMilliseconds,
       'end': end.inMilliseconds,
     };
@@ -37,9 +39,9 @@ class Flashcard {
   static Flashcard fromJson(Map<String, dynamic> json) {
     return Flashcard(
         uuid: json['uuid'],
-        text: json['text'] ?? '',
         translation: json['translation'] ?? '',
-        audioUrl: json['audioUrl'] ?? '',
+        podcastUrl: json['podcastUrl'] ?? '',
+        episodeUrl: json['episodeUrl'] ?? '',
         start: Duration(milliseconds: json['start'] ?? 0),
         end: Duration(milliseconds: json['end'] ?? 0));
   }

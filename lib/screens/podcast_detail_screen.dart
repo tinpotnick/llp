@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'podcast_player.dart';
 
 import 'package:provider/provider.dart';
-import '../models/podcast.dart';
-import '../providers/podcast_provider.dart';
-import '../services/podcast_service.dart';
+import 'package:llp/models/podcast.dart';
+import 'package:llp/providers/podcast_provider.dart';
+import 'package:llp/services/podcast_service.dart';
 
 class PodcastDetailScreen extends StatefulWidget {
   final dynamic podcast;
@@ -42,6 +42,7 @@ class PodcastDetailScreenState extends State<PodcastDetailScreen> {
     try {
       _podcast = await PodcastService.fetchPodcastDetails(widget.podcast);
     } catch (e) {
+      if(!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error fetching episodes: $e')));
     } finally {
@@ -53,15 +54,17 @@ class PodcastDetailScreenState extends State<PodcastDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading || _podcast == null) {
+    if (_isLoading || _podcast == null || _podcast?.episodes == null ) {
       return Center(child: CircularProgressIndicator());
     }
 
     final sanitizedDescription = extractPlainText(widget.podcast.description);
+    final podcast = _podcast!;
+    final episodes = podcast.episodes;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.podcast.title),
+        title: Text(podcast.title),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -73,7 +76,7 @@ class PodcastDetailScreenState extends State<PodcastDetailScreen> {
                   children: [
                     Center(
                       child: Image.network(
-                        widget.podcast.imageUrl,
+                        podcast.imageUrl,
                         height: 150,
                       ),
                     ),
@@ -83,12 +86,12 @@ class PodcastDetailScreenState extends State<PodcastDetailScreen> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Artist: ${widget.podcast.author}',
+                      'Artist: ${podcast.author}',
                       style: TextStyle(fontSize: 16),
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Feed URL: ${widget.podcast.url}',
+                      'Feed URL: ${podcast.url}',
                       style: TextStyle(fontSize: 16),
                     ),
                     ElevatedButton(
@@ -99,7 +102,7 @@ class PodcastDetailScreenState extends State<PodcastDetailScreen> {
                       onPressed: () async {
                         if (!_isSubscribed) {
                           Provider.of<PodcastProvider>(context, listen: false)
-                              .addPodcast(widget.podcast);
+                              .addPodcast(podcast);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content:
@@ -122,28 +125,23 @@ class PodcastDetailScreenState extends State<PodcastDetailScreen> {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: _podcast?.episodes.length,
+                      itemCount: episodes.length,
                       itemBuilder: (context, index) {
-                        final episode = _podcast?.episodes[index];
-
-                        final String episodeTitle = episode?.title ?? '';
+                        final episode = episodes[index];
 
                         return ListTile(
                           title: Text(
-                            episodeTitle,
+                            episode.title,
                           ),
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => PodcastPlayerScreen(
-                                  audioUrl: episode?.audioUrl ?? '',
-                                  episodeTitle: episode?.title ?? '',
-                                ),
+                                builder: (context) => PodcastPlayerScreen(podcastEpisode: episode),
                               ),
                             );
                           },
-                          subtitle: Text('Published on: ${episode?.pubDate}'),
+                          subtitle: Text('Published on: ${episode.pubDate}'),
                         );
                       },
                     ),

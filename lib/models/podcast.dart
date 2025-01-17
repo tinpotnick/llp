@@ -7,9 +7,9 @@ import 'package:html/parser.dart' as html_parser;
 
 String cleanCDataGlobal(String content) {
   return content
-      .replaceAll('<![CDATA[', '') // Remove starting CDATA tag
-      .replaceAll(']]>', '') // Remove ending CDATA tag
-      .trim(); // Remove extra whitespace
+      .replaceAll('<![CDATA[', '')
+      .replaceAll(']]>', '')
+      .trim();
 }
 
 String extractPlainText(String htmlContent) {
@@ -23,24 +23,30 @@ String normalizeString(String input) {
 
 class PodcastEpisode {
   final String title;
+  final String podcastUrl;
   final String audioUrl;
+  final String imageUrl;
   final String pubDate;
 
   PodcastEpisode({
     required this.title,
     required this.audioUrl,
+    required this.podcastUrl,
+    required this.imageUrl,
     required this.pubDate,
   });
 
   factory PodcastEpisode.fromJson(Map<String, dynamic> json) {
     return PodcastEpisode(
       title: json['title'],
+      podcastUrl: json['podcastUrl'],
       audioUrl: json['audioUrl'],
+      imageUrl: json['imageUrl'] ?? '',
       pubDate: json['pubDate'],
     );
   }
 
-  factory PodcastEpisode.fromRss(Element item) {
+  factory PodcastEpisode.fromRss(String url, Element item) {
     final title = item.getElementsByTagName('title').first.text;
     final audioUrl = item.getElementsByTagName('enclosure').isNotEmpty
         ? item.getElementsByTagName('enclosure').first.attributes['url']
@@ -49,9 +55,15 @@ class PodcastEpisode {
         ? item.getElementsByTagName('pubDate').first.text
         : 'Unknown Date';
 
+    final imageUrl = item.getElementsByTagName('itunes\\:image').isNotEmpty
+        ? item.getElementsByTagName('itunes\\:image').first.attributes['href']
+        : null;
+
     return PodcastEpisode(
       title: normalizeString(title),
+      podcastUrl: url,
       audioUrl: audioUrl ?? '',
+      imageUrl: imageUrl ?? '',
       pubDate: pubDate,
     );
   }
@@ -59,9 +71,25 @@ class PodcastEpisode {
   Map<String, dynamic> toJson() {
     return {
       'title': title,
+      'podcastUrl': podcastUrl,
       'audioUrl': audioUrl,
+      'imageUrl': imageUrl,
       'pubDate': pubDate,
     };
+  }
+
+  bool isEmpty() {
+    return audioUrl == '';
+  }
+
+  factory PodcastEpisode.empty() {
+    return PodcastEpisode(
+      title: '',
+      audioUrl: '',
+      podcastUrl: '',
+      imageUrl: '',
+      pubDate: ''
+    );
   }
 }
 
@@ -103,7 +131,7 @@ class Podcast {
     final items = document.getElementsByTagName('item');
 
     final episodes = items.map((item) {
-      return PodcastEpisode.fromRss(item);
+      return PodcastEpisode.fromRss(url, item);
     }).toList();
 
     String finalimageUrl = '';
@@ -135,5 +163,20 @@ class Podcast {
       'imageUrl': imageUrl,
       'episodes': episodes,
     };
+  }
+
+  bool isEmpty() {
+    return url == '';
+  }
+
+  factory Podcast.empty() {
+    return Podcast(
+      url: '',
+      title: '',
+      description: '',
+      author: '',
+      imageUrl: '',
+      episodes: []
+    );
   }
 }

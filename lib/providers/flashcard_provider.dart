@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/flashcard.dart';
+import 'package:llp/models/flashcard.dart';
+import 'package:llp/models/podcast.dart';
 
 class FlashcardProvider with ChangeNotifier {
   Map<String, Flashcard> _allCards = {};
@@ -12,8 +13,8 @@ class FlashcardProvider with ChangeNotifier {
     return _allCards[uuid]!;
   }
 
-  List<Flashcard> getFlashcardsForEpisode(String url) {
-    return _allCards.values.where((card) => card.audioUrl == url).toList();
+  List<Flashcard> getFlashcardsForEpisode(PodcastEpisode ep) {
+    return _allCards.values.where((card) => card.podcastUrl == ep.audioUrl).toList();
   }
 
   void addOrUpdateCard(Flashcard card) {

@@ -4,6 +4,7 @@ import 'subscribed_navigator.dart';
 import 'flashcard_deck.dart';
 import 'settings.dart';
 
+import 'package:llp/services/audio_player_manager.dart';
 import 'package:llp/widgets/podcast_player_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,7 +16,6 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  bool _isPlaying = true;
 
   // List of screens corresponding to the BottomNavigationBar items
   final List<Widget> _screens = [
@@ -33,6 +33,15 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    AudioPlayerManager().onPlayerStateChanged.listen((state) {
+      if (!mounted) return;
+      setState(() {});
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
@@ -40,14 +49,13 @@ class HomeScreenState extends State<HomeScreen> {
           // The selected screen content
           _screens[_selectedIndex],
 
-          // PodcastPlayerWidget placed above the BottomNavigationBar
-          if (true) // Replace 'true' with your condition for showing the player
+          if (AudioPlayerManager().hasEpisode())
             Positioned(
-              left: 0,
-              right: 0,
-              bottom: kBottomNavigationBarHeight, // Position above the BottomNavigationBar
+              left: 5,
+              right: 5,
+              bottom: 0,//kBottomNavigationBarHeight, // Position above the BottomNavigationBar
               child: PodcastPlayerWidget(
-                audioUrl: "",
+                podcastEpisode: AudioPlayerManager().getEpisode(),
                 onPositionChanged: (position) => {},
               ),
             ),
