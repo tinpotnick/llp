@@ -36,6 +36,7 @@ class _FlashcardTileState extends State<FlashcardTile> {
 
     AudioPlayerManager().onPlayerStateChanged.listen( ( state ) {
       setState(() {
+        if(!mounted) return;
         _isPlaying = state == PlayerState.playing;
       });
     } );
