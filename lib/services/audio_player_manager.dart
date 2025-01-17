@@ -11,7 +11,14 @@ class AudioPlayerManager {
   static final AudioPlayerManager _instance = AudioPlayerManager._internal();
   factory AudioPlayerManager() => _instance;
 
+  bool _replaySection = false;
+  bool _replayEpisode = false;
+
+  Duration _currentPosition = Duration.zero;
+  Duration _currentDuration = Duration.zero;
+
   PodcastEpisode? _podcastepisode;
+  Flashcard? _card;
 
   // AudioPlayer instance
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -39,12 +46,27 @@ class AudioPlayerManager {
   AudioPlayerManager._internal() {
     // Listen to AudioPlayer events and broadcast via streams
     _audioPlayer.onPositionChanged.listen((position) {
+
+      _currentPosition = position;
+
+      if( _replaySection && _card != null && _card!.episodeUrl == _podcastepisode!.audioUrl) {
+        if( position >= _card!.end ) {
+          position = _card!.start;
+          _audioPlayer.seek(_card!.start);
+        }
+      } else if( _replayEpisode ) {
+        if( _currentDuration != Duration.zero && position >= _currentDuration ) {
+          _audioPlayer.seek(Duration.zero);
+        }
+      }
+
       _positionController.add(position);
     });
 
     _audioPlayer.onDurationChanged.listen((duration) {
       if (duration.inMilliseconds > 0) {
         _durationController.add(duration);
+        _currentDuration = duration;
       }
     });
 
@@ -55,6 +77,38 @@ class AudioPlayerManager {
     _audioPlayer.onPlayerComplete.listen((event) {
       _completionController.add(null);
     });
+  }
+
+  set replaySection( val ) {
+    _replaySection = val;
+    if( val ) {
+      _replayEpisode = false;
+
+      if( _card != null && _card!.episodeUrl == _podcastepisode!.audioUrl) {
+        if(_currentPosition > _card!.end) {
+          _audioPlayer.seek(_card!.start);
+        }
+
+        if(_currentPosition < _card!.start) {
+          _audioPlayer.seek(_card!.start);
+        }
+      }
+    }
+  }
+
+  set replayEpisode( val ) {
+    _replayEpisode = val;
+    if( val ) {
+      _replaySection = false;
+    }
+  }
+
+  get replayEpisode {
+    return _replayEpisode;
+  }
+
+  get replaySection {
+    return _replaySection;
   }
 
   bool isPlaying() {
@@ -88,10 +142,11 @@ class AudioPlayerManager {
       await  _audioPlayer.play(UrlSource(podcastepisode.audioUrl));
     }
     
-    if( card != null ) {
-      await _audioPlayer.seek(card.start);
-      // TODO and do end
+    _card = card;
 
+    if( card != null ) {
+      replaySection = true;
+      await _audioPlayer.seek(card.start);
       _updateFlashcardPositions(card);
     }
   }

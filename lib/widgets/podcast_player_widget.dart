@@ -220,16 +220,41 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
                                 alignment: Alignment.center,
                                 children: [
                                   IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(Icons.crop, size: 10),
+                                    onPressed: () {
+                                      setState(() {
+                                        // Toggle the value of replaySection
+                                        AudioPlayerManager().replaySection = !AudioPlayerManager().replaySection;
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.crop,
+                                      size: 10,
+                                      color: AudioPlayerManager().replaySection ? Colors.blue : Colors.grey,
+                                    ),
                                   ),
                                   IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(Icons.repeat),
+                                    onPressed: () {
+                                      setState(() {
+                                        // Toggle the value of replaySection
+                                        AudioPlayerManager().replaySection = !AudioPlayerManager().replaySection;
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.repeat,
+                                      color: AudioPlayerManager().replaySection ? Colors.blue : Colors.grey,
+                                    ),
                                   ),
                                 ],
                               ),
-                              IconButton(onPressed: () {}, icon: Icon(Icons.repeat)),
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    AudioPlayerManager().replayEpisode = !AudioPlayerManager().replayEpisode;
+                                  } );
+                                }, 
+                                icon: Icon(Icons.repeat),
+                                color: AudioPlayerManager().replayEpisode ? Colors.blue : Colors.grey,
+                              ),
                             ],
                           ),
                           Text(

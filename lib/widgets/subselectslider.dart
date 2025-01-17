@@ -47,7 +47,7 @@ class SliderWithCustomTrackState extends State<SliderWithCustomTrack> {
         totalDuration = sectionEnd;
     }
     if( pos >= sectionEnd ) {
-      pos = sectionStart;
+      //pos = sectionStart;
     }
   }
 
@@ -89,13 +89,8 @@ class SliderWithCustomTrackState extends State<SliderWithCustomTrack> {
           child: Slider(
             value: pos,
             onChanged: (newValue) {
-              setState(() {
-                // Clamp the value within min and max
-                pos = newValue.clamp(sectionStart, sectionEnd);
-              });
-
               if (widget.onChanged != null) {
-                widget.onChanged!(pos);
+                widget.onChanged!(newValue);
               }
             },
             min: 0,
