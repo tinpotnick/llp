@@ -44,14 +44,15 @@ class _FlashcardTileState extends State<FlashcardTile> {
           widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
 
       if (flashcard == null) return;
-
+print(flashcard.podcastUrl);
       final podcast = Provider.of<PodcastProvider>(context, listen: false)
                               .getPodcast(flashcard.podcastUrl);
       final episode = Provider.of<PodcastProvider>(context, listen: false)
                               .getPodcastEpisode(podcast, flashcard.episodeUrl);
 
-      if(episode == PodcastEpisode.empty()) return;
+      if(episode.isEmpty()) return;
 
+print("play ${episode.audioUrl}, ${flashcard.start}");
       await AudioPlayerManager().play(episode, flashcard);
 
       _isPlaying = true;

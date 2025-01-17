@@ -163,8 +163,8 @@ class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
       final newcard = Flashcard(
         uuid: widget.flashcard.uuid,
         translation: _translationController.text,
-        podcastUrl: widget.flashcard.podcastUrl,
-        episodeUrl: widget.flashcard.episodeUrl,
+        podcastUrl: widget.episode.podcastUrl,
+        episodeUrl: widget.episode.audioUrl,
         start: newStart,
         end: newEnd,
       );
