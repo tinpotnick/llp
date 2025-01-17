@@ -58,7 +58,6 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
     });
 
     AudioPlayerManager().onFlashcardUpdate.listen((card) {
-      print(card.start);
       _selectedStart = card.start;
       _selectedEnd = card.end;
 
