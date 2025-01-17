@@ -1,7 +1,8 @@
 
+import 'package:audioplayers/audioplayers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:llp/models/usercard.dart';
-import 'package:llp/models/podcast.dart';
 import 'package:provider/provider.dart';
 import 'package:llp/providers/usercard_provider.dart';
 import 'package:llp/providers/podcast_provider.dart';
@@ -33,12 +34,16 @@ class _FlashcardTileState extends State<FlashcardTile> {
   void initState() {
     super.initState();
 
+    AudioPlayerManager().onPlayerStateChanged.listen( ( state ) {
+      setState(() {
+        _isPlaying = state == PlayerState.playing;
+      });
+    } );
   }
 
   Future<void> _playPause() async {
     if (_isPlaying) {
       await AudioPlayerManager().pause();
-      _isPlaying = false;
     } else {
       final flashcard =
           widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
@@ -53,11 +58,7 @@ class _FlashcardTileState extends State<FlashcardTile> {
       if(episode.isEmpty()) return;
 
       await AudioPlayerManager().play(episode, flashcard);
-
-      _isPlaying = true;
     }
-
-    setState(() {});
   }
 
   Future<void> _gradeCard(int interval) async {
