@@ -75,6 +75,10 @@ class SliderWithCustomTrackState extends State<SliderWithCustomTrack> {
       body: Center(
         child: SliderTheme(
           data: SliderTheme.of(context).copyWith(
+            thumbShape: RoundSliderThumbShape(
+              enabledThumbRadius: 4.0, // Smaller thumb size
+              disabledThumbRadius: 2.0,
+            ),
             trackShape: CustomSectionSliderTrackShape(
               sectionStart: sectionStart,
               sectionEnd: sectionEnd,
@@ -94,8 +98,8 @@ class SliderWithCustomTrackState extends State<SliderWithCustomTrack> {
                 widget.onChanged!(pos);
               }
             },
-            min: sectionStart,
-            max: sectionEnd,
+            min: 0,
+            max: totalDuration,
             activeColor: Colors.green,
             inactiveColor: Colors.grey,
           ),
@@ -130,6 +134,7 @@ class CustomSectionSliderTrackShape extends SliderTrackShape {
     final double trackLeft = offset.dx;
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
     final double trackWidth = parentBox.size.width;
+
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 
@@ -157,29 +162,32 @@ class CustomSectionSliderTrackShape extends SliderTrackShape {
     final double trackWidth = trackRect.width;
     final double trackLeft = trackRect.left;
 
-    // Avoid division-by-zero by ensuring max > min
     if (max <= min) return;
 
-    // Normalize sectionStart and sectionEnd to within the track
     final double sectionStartX = trackLeft + ((sectionStart - min) / (max - min)) * trackWidth;
     final double sectionEndX = trackLeft + ((sectionEnd - min) / (max - min)) * trackWidth;
 
-    // Paint the track
     final Paint activePaint = Paint()..color = sliderTheme.activeTrackColor!;
     final Paint inactivePaint = Paint()..color = sliderTheme.inactiveTrackColor!;
     final Paint purplePaint = Paint()..color = Colors.purpleAccent;
 
-    // Draw inactive track after thumb
-    final Rect inactiveAfterRect = Rect.fromLTWH(thumbCenter.dx, trackRect.top, trackLeft + trackWidth - thumbCenter.dx, trackRect.height);
-    context.canvas.drawRect(inactiveAfterRect, inactivePaint);
+    // Draw inactive track
+    final Rect inactiveTrackRect = Rect.fromLTWH(trackLeft, trackRect.top, trackWidth, trackRect.height);
+    context.canvas.drawRect(inactiveTrackRect, inactivePaint);
 
-    // Draw active track (everything left of thumb)
+    // Draw active track (everything left of the thumb)
     final Rect activeTrackRect = Rect.fromLTWH(trackLeft, trackRect.top, thumbCenter.dx - trackLeft, trackRect.height);
     context.canvas.drawRect(activeTrackRect, activePaint);
 
-    // Draw the purple section
+    // Draw the purple section slightly above the main track
+    const double offsetY = -3.0; // Adjust this to move the highlight
     if (sectionEndX > sectionStartX) {
-      final Rect purpleRect = Rect.fromLTWH(sectionStartX, trackRect.top, sectionEndX - sectionStartX, trackRect.height);
+      final Rect purpleRect = Rect.fromLTWH(
+        sectionStartX,
+        trackRect.top + offsetY, // Offset the purple bar
+        sectionEndX - sectionStartX,
+        trackRect.height,
+      );
       context.canvas.drawRect(purpleRect, purplePaint);
     }
   }

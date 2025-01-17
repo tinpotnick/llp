@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-import '../services/audio_player_manager.dart';
-import '../services/podcast_service.dart';
-import '../models/podcast.dart';
+import 'package:llp/services/audio_player_manager.dart';
+import 'package:llp/services/podcast_service.dart';
+import 'package:llp/models/podcast.dart';
 
-import '../widgets/subselectslider.dart';
+import 'package:llp/widgets/subselectslider.dart';
 
 class PodcastPlayerWidget extends StatefulWidget {
   final PodcastEpisode podcastEpisode;
@@ -26,6 +26,9 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
   double _downloadProgress = 0.0;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
+
+  Duration _selectedStart = Duration.zero;
+  Duration _selectedEnd = Duration.zero;
 
   @override
   void initState() {
@@ -50,6 +53,18 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
     });
 
     AudioPlayerManager().onPlayerStateChanged.listen((state) {
+      if (!mounted) return;
+      setState(() {});
+    });
+
+    AudioPlayerManager().onFlashcardUpdate.listen((card) {
+      print(card.start);
+      _selectedStart = card.start;
+      _selectedEnd = card.end;
+
+      if(_selectedStart >= _totalDuration) _selectedStart = _totalDuration;
+      if(_selectedEnd >= _totalDuration || _selectedEnd >= _selectedStart) _totalDuration = _totalDuration;
+
       if (!mounted) return;
       setState(() {});
     });
@@ -155,8 +170,8 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
                                 ),
                                 child: SliderWithCustomTrack(
                                   value: _currentPosition.inMilliseconds.toDouble(),
-                                  min: 0,
-                                  max: _totalDuration.inMilliseconds.toDouble(),
+                                  min: _selectedStart.inMilliseconds.toDouble(),
+                                  max: _selectedEnd.inMilliseconds.toDouble(),
                                   duration: _totalDuration.inMilliseconds.toDouble(),
                                   onChanged: (value) {
                                     final newPosition = Duration(milliseconds: value.toInt());

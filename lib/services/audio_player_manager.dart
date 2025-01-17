@@ -26,11 +26,15 @@ class AudioPlayerManager {
   final StreamController<void> _completionController =
       StreamController<void>.broadcast();
 
+  final StreamController<Flashcard> _flashcardController =
+    StreamController<Flashcard>.broadcast();
+
   // Streams
   Stream<Duration> get onPositionChanged => _positionController.stream;
   Stream<Duration> get onDurationChanged => _durationController.stream;
   Stream<PlayerState> get onPlayerStateChanged => _stateController.stream;
   Stream<void> get onPlayerComplete => _completionController.stream;
+  Stream<Flashcard> get onFlashcardUpdate => _flashcardController.stream;
 
   AudioPlayerManager._internal() {
     // Listen to AudioPlayer events and broadcast via streams
@@ -65,6 +69,10 @@ class AudioPlayerManager {
     return _podcastepisode ?? PodcastEpisode.empty();
   }
 
+  void _updateFlashcardPositions(Flashcard card) {
+    _flashcardController.add(card);
+  }
+
   Future<void> play(PodcastEpisode podcastepisode, [ Flashcard? card ]) async {
 
     if( podcastepisode.isEmpty() ) return;
@@ -83,6 +91,8 @@ class AudioPlayerManager {
     if( card != null ) {
       await _audioPlayer.seek(card.start);
       // TODO and do end
+
+      _updateFlashcardPositions(card);
     }
   }
 
