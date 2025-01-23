@@ -6,15 +6,7 @@ import 'package:llp/services/podcast_service.dart';
 import 'package:llp/models/podcast.dart';
 
 import 'package:llp/widgets/subselectslider.dart';
-
-
-
-
-import 'package:provider/provider.dart';
-
 import 'package:llp/models/flashcard.dart';
-import 'package:llp/models/podcast.dart';
-import 'package:llp/providers/flashcard_provider.dart';
 import 'package:llp/screens/flashcard_editor.dart';
 
 class PodcastPlayerWidget extends StatefulWidget {
