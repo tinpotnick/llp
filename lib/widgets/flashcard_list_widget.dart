@@ -25,35 +25,11 @@ class FlashcardListWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _addFlashcard(BuildContext context) async {
-    Duration currentPosition = getPosition();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FlashcardEditorScreen(
-          flashcard: Flashcard(
-            translation: '',
-            episodeUrl: episode.audioUrl,
-            podcastUrl: '',
-            start: currentPosition - const Duration(seconds: 5),
-            end: currentPosition,
-          ),
-          episode: episode,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ElevatedButton.icon(
-          onPressed: () => _addFlashcard(context),
-          icon: const Icon(Icons.add),
-          label: const Text("Add Flashcard"),
-        ),
         Expanded(
           child: Consumer<FlashcardProvider>(
             builder: (context, flashcardProvider, child) {

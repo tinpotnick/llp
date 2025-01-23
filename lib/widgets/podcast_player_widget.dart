@@ -7,6 +7,16 @@ import 'package:llp/models/podcast.dart';
 
 import 'package:llp/widgets/subselectslider.dart';
 
+
+
+
+import 'package:provider/provider.dart';
+
+import 'package:llp/models/flashcard.dart';
+import 'package:llp/models/podcast.dart';
+import 'package:llp/providers/flashcard_provider.dart';
+import 'package:llp/screens/flashcard_editor.dart';
+
 class PodcastPlayerWidget extends StatefulWidget {
   final PodcastEpisode podcastEpisode;
   final ValueChanged<Duration> onPositionChanged;
@@ -114,6 +124,45 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  Future<void> _addFlashcard(BuildContext context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FlashcardEditorScreen(
+          flashcard: Flashcard(
+            origional: '',
+            translation: '',
+            episodeUrl: widget.podcastEpisode.audioUrl,
+            podcastUrl: widget.podcastEpisode.podcastUrl,
+            start: _currentPosition - const Duration(seconds: 5),
+            end: _currentPosition,
+          ),
+          episode: widget.podcastEpisode,
+        ),
+      ),
+    );
+  }
+
+// TODO
+  Future<void> _translateEpisode(BuildContext context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FlashcardEditorScreen(
+          flashcard: Flashcard(
+            origional: '',
+            translation: '',
+            episodeUrl: widget.podcastEpisode.audioUrl,
+            podcastUrl: '',
+            start: _currentPosition - const Duration(seconds: 5),
+            end: _currentPosition,
+          ),
+          episode: widget.podcastEpisode,
+        ),
+      ),
+    );
   }
 
   @override
@@ -254,6 +303,14 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
                                 }, 
                                 icon: Icon(Icons.repeat),
                                 color: AudioPlayerManager().replayEpisode ? Colors.blue : Colors.grey,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () => _addFlashcard(context),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.translate),
+                                onPressed: () => _translateEpisode(context),
                               ),
                             ],
                           ),
