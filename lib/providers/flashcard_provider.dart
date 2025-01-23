@@ -14,7 +14,7 @@ class FlashcardProvider with ChangeNotifier {
   }
 
   List<Flashcard> getFlashcardsForEpisode(PodcastEpisode ep) {
-    return _allCards.values.where((card) => card.podcastUrl == ep.audioUrl).toList();
+    return _allCards.values.where((card) => card.episodeUrl == ep.audioUrl).toList();
   }
 
   void addOrUpdateCard(Flashcard card) {
