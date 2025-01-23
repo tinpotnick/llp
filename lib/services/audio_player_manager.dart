@@ -131,6 +131,15 @@ class AudioPlayerManager {
 
     if( podcastepisode.isEmpty() ) return;
 
+    // are we playing the same episode - if so can we hold onto the card
+    if( _podcastepisode?.audioUrl == podcastepisode.audioUrl ) {
+      if( null != card ) {
+        _card = card;
+      }
+    } else {
+      _card = null;
+    }
+
     _podcastepisode = podcastepisode;
     final isDownloaded = await PodcastService.hasDownload(podcastepisode.audioUrl);
 
@@ -141,8 +150,6 @@ class AudioPlayerManager {
     } else {
       await  _audioPlayer.play(UrlSource(podcastepisode.audioUrl));
     }
-    
-    _card = card;
 
     if( card != null ) {
       replaySection = true;
