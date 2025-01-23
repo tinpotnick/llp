@@ -6,6 +6,7 @@ import 'dart:math';
 
 class Flashcard {
   final String uuid;
+  final String origional;
   final String translation;
   /* the rss feed */
   final String podcastUrl;
@@ -16,6 +17,7 @@ class Flashcard {
 
   Flashcard({
     String? uuid,
+    required this.origional,
     required this.translation,
     required this.podcastUrl,
     required this.episodeUrl,
@@ -28,6 +30,7 @@ class Flashcard {
   Map<String, dynamic> toJson() {
     return {
       'uuid': uuid,
+      'origional': origional,
       'translation': translation,
       'podcastUrl': podcastUrl,
       'episodeUrl': episodeUrl,
@@ -39,6 +42,7 @@ class Flashcard {
   static Flashcard fromJson(Map<String, dynamic> json) {
     return Flashcard(
         uuid: json['uuid'],
+        origional: json['origional'] ?? '',
         translation: json['translation'] ?? '',
         podcastUrl: json['podcastUrl'] ?? '',
         episodeUrl: json['episodeUrl'] ?? '',

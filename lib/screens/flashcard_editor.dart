@@ -22,6 +22,7 @@ class FlashcardEditorScreen extends StatefulWidget {
 }
 
 class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
+  late TextEditingController _origionalController;
   late TextEditingController _translationController;
   late TextEditingController _startController;
   late TextEditingController _endController;
@@ -32,6 +33,8 @@ class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
   @override
   void initState() {
     super.initState();
+    _origionalController =
+        TextEditingController(text: widget.flashcard.origional);
     _translationController =
         TextEditingController(text: widget.flashcard.translation);
     _startController = TextEditingController(
@@ -96,6 +99,7 @@ class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
 
   @override
   void dispose() {
+    _origionalController.dispose();
     _translationController.dispose();
     _startController.dispose();
     _endController.dispose();
@@ -153,6 +157,7 @@ class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
     if (flashcardprovider.hasCard(widget.flashcard.uuid)) {
       flashcardprovider.updateCard(Flashcard(
         uuid: widget.flashcard.uuid,
+        origional: _origionalController.text,
         translation: _translationController.text,
         podcastUrl: widget.flashcard.podcastUrl,
         episodeUrl: widget.flashcard.episodeUrl,
@@ -162,6 +167,7 @@ class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
     } else {
       final newcard = Flashcard(
         uuid: widget.flashcard.uuid,
+        origional: _origionalController.text,
         translation: _translationController.text,
         podcastUrl: widget.episode.podcastUrl,
         episodeUrl: widget.episode.audioUrl,
@@ -268,6 +274,16 @@ class FlashcardEditorScreenState extends State<FlashcardEditorScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Translation field
+            TextField(
+              controller: _origionalController,
+              maxLines: 5,
+              minLines: 3,
+              decoration: InputDecoration(
+                labelText: 'Origional',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
             TextField(
               controller: _translationController,
               maxLines: 5,
