@@ -140,6 +140,8 @@ class _FlashcardTileState extends State<FlashcardTile> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Text('Origional: ${flashcard.origional}'),
+                  SizedBox(height: 8),
                   Text('Translation: ${flashcard.translation}'),
                   SizedBox(height: 8),
                   OverflowBar(
