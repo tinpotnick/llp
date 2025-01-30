@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -154,7 +155,8 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
     final localpodcastfile =
           await PodcastService.getLocalPodcastFilePath(widget.podcastEpisode.audioUrl);
 
-    await TranscribeService.transcribePodcast(widget.podcastEpisode, localpodcastfile, prov);
+    final fileExtension = p.extension(localpodcastfile);
+    await TranscribeService.transcribePodcast(widget.podcastEpisode, localpodcastfile, prov, fileExtension);
   }
 
   @override
