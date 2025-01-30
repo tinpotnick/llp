@@ -29,16 +29,33 @@ class FlashcardTile extends StatefulWidget {
 class _FlashcardTileState extends State<FlashcardTile> {
   bool _isPlaying = false;
   bool _isRevealed = false;
+  bool _isOurFlashcard = false;
 
   @override
   void initState() {
     super.initState();
 
     AudioPlayerManager().onPlayerStateChanged.listen( ( state ) {
+      if(!mounted) return;
+      if(!_isOurFlashcard) return;
       setState(() {
-        if(!mounted) return;
         _isPlaying = state == PlayerState.playing;
       });
+    } );
+
+    AudioPlayerManager().onFlashcardUpdate.listen( ( card ) {
+      if(!mounted) return;
+      setState(() {
+        final flashcard =
+            widget.userCardProvider.getFlashcardForUserCard(widget.flashcard);
+
+        if( card == flashcard ) {
+          _isOurFlashcard = true;
+        } else {
+          _isOurFlashcard = false;
+          _isPlaying = false;
+        }
+      } );
     } );
   }
 
@@ -140,9 +157,9 @@ class _FlashcardTileState extends State<FlashcardTile> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Origional: ${flashcard.origional}'),
+                  SelectableText('Origional: ${flashcard.origional}'),
                   SizedBox(height: 8),
-                  Text('Translation: ${flashcard.translation}'),
+                  SelectableText('Translation: ${flashcard.translation}'),
                   SizedBox(height: 8),
                   OverflowBar(
                     children: [
