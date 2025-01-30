@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:llp/models/podcast.dart';
 import 'package:provider/provider.dart';
-import '../models/flashcard.dart';
-import '../models/usercard.dart';
-import '../providers/flashcard_provider.dart';
-import '../providers/usercard_provider.dart';
+import 'package:llp/models/flashcard.dart';
+import 'package:llp/models/usercard.dart';
+import 'package:llp/providers/flashcard_provider.dart';
+import 'package:llp/providers/usercard_provider.dart';
 
-import '../services/audio_player_manager.dart';
+import 'package:llp/services/audio_player_manager.dart';
 
 class FlashcardEditorScreen extends StatefulWidget {
   final PodcastEpisode episode;

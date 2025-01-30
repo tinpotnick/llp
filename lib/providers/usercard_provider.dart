@@ -18,6 +18,10 @@ class UserCardProvider with ChangeNotifier {
     return _userStatus[card.uuid]!;
   }
 
+  bool hasCard(Flashcard card) {
+    return _userStatus.containsKey(card.uuid);
+  }
+
   List<UserFlashcardStatus> getDueCards() {
     final List<UserFlashcardStatus> dueCards = [];
 
