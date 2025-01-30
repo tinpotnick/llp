@@ -59,10 +59,14 @@ String normalizeString(String input) {
 */
 class TranscribeService {
 
-  static Future<Endpoints> fetchApiUrls(String apiEndpoint) async {
+  static Future<Endpoints> fetchApiUrls(String apiEndpoint, String format) async {
     final url = Uri.parse(apiEndpoint);
 
-    final response = await http.post(url);
+    final urlWithParams = url.replace(queryParameters: {
+      "format": format
+    });
+
+    final response = await http.post(urlWithParams);
 
     // Check if the response is successful (status code 200)
     if (response.statusCode == 200) {
@@ -151,14 +155,14 @@ class TranscribeService {
   /// 4. download then parse and add to list
   /// 5. check for duplicates
   ///
-  static Future<List<TranscribedItem>> transcribePodcast(PodcastEpisode episode, String localfile,  FlashcardProvider provideor) async {
+  static Future<List<TranscribedItem>> transcribePodcast(PodcastEpisode episode, String localfile,  FlashcardProvider provideor, String format) async {
 
     // 1.
     //if(false) {
 
     
     final devapi = "http://localhost:4566/restapis/myid123/prod/_user_request_/get-upload-url";
-    final endpoints = await TranscribeService.fetchApiUrls( devapi );
+    final endpoints = await TranscribeService.fetchApiUrls( devapi, format );
     print(endpoints.putUrl);
     print(endpoints.getUrl);
     // 2.
