@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+import 'package:llp/providers/flashcard_provider.dart';
 import 'package:llp/services/audio_player_manager.dart';
 import 'package:llp/services/podcast_service.dart';
 import 'package:llp/models/podcast.dart';
@@ -8,6 +10,8 @@ import 'package:llp/models/podcast.dart';
 import 'package:llp/widgets/subselectslider.dart';
 import 'package:llp/models/flashcard.dart';
 import 'package:llp/screens/flashcard_editor.dart';
+
+import 'package:llp/services/transcribe.dart';
 
 class PodcastPlayerWidget extends StatefulWidget {
   final PodcastEpisode podcastEpisode;
@@ -137,24 +141,20 @@ class PodcastPlayerWidgetState extends State<PodcastPlayerWidget> {
     );
   }
 
-// TODO
   Future<void> _translateEpisode(BuildContext context) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FlashcardEditorScreen(
-          flashcard: Flashcard(
-            origional: '',
-            translation: '',
-            episodeUrl: widget.podcastEpisode.audioUrl,
-            podcastUrl: '',
-            start: _currentPosition - const Duration(seconds: 5),
-            end: _currentPosition,
-          ),
-          episode: widget.podcastEpisode,
-        ),
-      ),
-    );
+
+    final prov = Provider.of<FlashcardProvider>(context, listen: false);
+    final isDownloaded = await PodcastService.hasDownload(widget.podcastEpisode.audioUrl);
+
+    if (!isDownloaded) {
+      // TODO report error - to request download
+      return;
+    }
+      
+    final localpodcastfile =
+          await PodcastService.getLocalPodcastFilePath(widget.podcastEpisode.audioUrl);
+
+    await TranscribeService.transcribePodcast(widget.podcastEpisode, localpodcastfile, prov);
   }
 
   @override
