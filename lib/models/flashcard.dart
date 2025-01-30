@@ -39,6 +39,32 @@ class Flashcard {
     };
   }
 
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true; // Check if they are the same instance in memory
+    if (other.runtimeType != runtimeType) return false; // Ensure the types match
+    if (other is! Flashcard) return false; // Ensure the other object is a Flashcard
+    return uuid == other.uuid &&
+        origional == other.origional &&
+        translation == other.translation &&
+        podcastUrl == other.podcastUrl &&
+        episodeUrl == other.episodeUrl &&
+        start == other.start &&
+        end == other.end;
+  }
+
+  // Overriding `hashCode` to work with collections like Set or Map
+  @override
+  int get hashCode => Object.hash(
+        uuid,
+        origional,
+        translation,
+        podcastUrl,
+        episodeUrl,
+        start,
+        end,
+      );
+
   static Flashcard fromJson(Map<String, dynamic> json) {
     return Flashcard(
         uuid: json['uuid'],
