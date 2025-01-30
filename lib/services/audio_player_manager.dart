@@ -84,7 +84,7 @@ class AudioPlayerManager {
     if( val ) {
       _replayEpisode = false;
 
-      if( _card != null && _card!.episodeUrl == _podcastepisode!.audioUrl) {
+      if( _card != null && _card?.episodeUrl == _podcastepisode?.audioUrl) {
         if(_currentPosition > _card!.end) {
           _audioPlayer.seek(_card!.start);
         }
@@ -132,12 +132,19 @@ class AudioPlayerManager {
     if( podcastepisode.isEmpty() ) return;
 
     // are we playing the same episode - if so can we hold onto the card
-    if( _podcastepisode?.audioUrl == podcastepisode.audioUrl ) {
+    if( !hasEpisode() ) {
+      _card = card;
+    } else if( _podcastepisode?.audioUrl == podcastepisode.audioUrl ) {
       if( null != card ) {
         _card = card;
       }
     } else {
       _card = null;
+    }
+
+    if( card != null ) {
+      replaySection = true;
+      _updateFlashcardPositions(card);
     }
 
     _podcastepisode = podcastepisode;
@@ -152,9 +159,7 @@ class AudioPlayerManager {
     }
 
     if( card != null ) {
-      replaySection = true;
       await _audioPlayer.seek(card.start);
-      _updateFlashcardPositions(card);
     }
   }
 
